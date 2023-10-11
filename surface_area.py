@@ -104,9 +104,9 @@ time_intervals = np.linspace(0, 15, 450)
 
 # Assuming you have a folder with only TIFF files
 normal = 'D:/ann/Experiment/E4031/Normal 1/'
-hundred_nM = 'D:/ann/Experiment/E4031/100 nM E4031 1/'
-five_hundred_nM = 'D:/ann/Experiment/E4031/500 nM E4031 1/'
-one_um = 'D:/ann/Experiment/E4031/1 um E4031 1/'
+hundred_nM = 'D:/ann/Experiment/Isoprenaline/100 nM Isoprenaline 1/'
+five_hundred_nM = 'D:/ann/Experiment/Isoprenaline/500 nM Isoprenaline 1/'
+one_um = 'D:/ann/Experiment/Isoprenaline/1 um Isoprenaline 1/'
 
 normal_area = [surface_area(frame) for frame in frames(normal)]
 hundred_nM_area = [surface_area(frame) for frame in frames(hundred_nM)]
@@ -114,16 +114,16 @@ five_hundred_nM_area = [surface_area(frame) for frame in frames(five_hundred_nM)
 one_um_area = [surface_area(frame) for frame in frames(one_um)]
 
 plt.plot(time_intervals, normal_area, color='green', marker='o', markersize=2, label='Normal')
-plt.plot(time_intervals, hundred_nM_area, color='purple', marker='o', markersize=2, label='100 nM E4031')
-plt.plot(time_intervals, five_hundred_nM_area, color='orange', marker='o', markersize=2, label='500 nM E4031')
-plt.plot(time_intervals, one_um_area, color='red', marker='o', markersize=2, label='1 um E4031')
+plt.plot(time_intervals, hundred_nM_area, color='purple', marker='o', markersize=2, label='100 nM Isoprenaline')
+plt.plot(time_intervals, five_hundred_nM_area, color='orange', marker='o', markersize=2, label='500 nM Isoprenaline')
+plt.plot(time_intervals, one_um_area, color='red', marker='o', markersize=2, label='1 um Isoprenaline')
 plt.xlabel('Relative time (sec)')
 plt.ylabel('Surface area (sq cm)')
 
 # Isoprenaline increases the force of contraction of the heart muscle.
-plt.title('Effect of E4031 on Cardiomyocyte surface area (Experiment 1)')
+plt.title('Effect of Isoprenaline on Cardiomyocyte surface area (Experiment 1)')
 plt.legend()
-plt.savefig('E4031 area 1')
+plt.savefig('Isoprenaline area 1')
 plt.show()
 
 # Isoprenaline
