@@ -3,7 +3,7 @@ import cv2
 import math
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.signal import find_peaks
+from sklearn import preprocessing
 
 
 def frames(folder_path):
@@ -155,10 +155,10 @@ time_intervals = np.linspace(0, 15, 450)
 # Baseline < 100 nM Isoprenaline < 500 nM Isoprenaline < 1 µM Isoprenaline.
 
 # Assuming you have a folder with only TIFF files
-normal = 'D:/ann/Experiment/E4031/Normal 3/'
-hundred_nM = 'D:/ann/Experiment/E4031/100 nM E4031 3/'
-five_hundred_nM = 'D:/ann/Experiment/E4031/500 nM E4031 3/'
-one_um = 'D:/ann/Experiment/E4031/1 um E4031 3/'
+normal = 'D:/ann/Experiment/Isoprenaline/Normal 1/'
+hundred_nM = 'D:/ann/Experiment/Isoprenaline/100 nM Isoprenaline 1/'
+five_hundred_nM = 'D:/ann/Experiment/Isoprenaline/500 nM Isoprenaline 1/'
+one_um = 'D:/ann/Experiment/Isoprenaline/1 um Isoprenaline 1/'
 
 # Extract calcium concentration values from the frames
 normal_intensity = [roi_mean_intensity(frame) for frame in frames(normal)]
@@ -167,20 +167,30 @@ five_hundred_nM_intensity = [roi_mean_intensity(frame) for frame in frames(five_
 one_um_intensity = [roi_mean_intensity(frame) for frame in frames(one_um)]
 
 
+'''
+float(i)/sum(raw) divides each element by the sum of all the elements in raw. 
+This effectively normalizes each element to be a value between 0 and 1. 
+'''
+normalize1 = [(float(i)/sum(normal_intensity))*100 for i in normal_intensity]
+normalize2 = [(float(i)/sum(hundred_nM_intensity))*100 for i in hundred_nM_intensity]
+normalize3 = [(float(i)/sum(five_hundred_nM_intensity))*100 for i in five_hundred_nM_intensity]
+normalize4 = [(float(i)/sum(one_um_intensity))*100 for i in one_um_intensity]
+
+
 # Plot the mean intensities
-plt.plot(time_intervals, normal_intensity, color='green', marker='o', markersize=2, label='Normal')
-plt.plot(time_intervals, hundred_nM_intensity, color='purple', marker='o', markersize=2, label='100 nM E4031')
-plt.plot(time_intervals, five_hundred_nM_intensity, color='orange', marker='o', markersize=2, label='500 nM E4031')
-plt.plot(time_intervals, one_um_intensity, color='red', marker='o', markersize=2, label='1 um E4031')
+plt.plot(time_intervals, normal_intensity, color='green', markersize=1, label='Normal')
+plt.plot(time_intervals, hundred_nM_intensity, color='purple', markersize=1, label='100 nM Isoprenaline')
+plt.plot(time_intervals, five_hundred_nM_intensity, color='orange', markersize=1, label='500 nM Isoprenaline')
+plt.plot(time_intervals, one_um_intensity, color='red',  markersize=1, label='1 um Isoprenaline')
 # plt.ylim(0, 100)
 plt.xlabel('Relative time (sec)')
 plt.ylabel('Mean Intensities')
 
 
 # Isoprenaline increases the force of contraction of the heart muscle.
-plt.title('Effect of E4031 on Cardiomyocyte contraction rate (Experiment 3)')
-plt.legend()
-plt.savefig('E4031 intensity 3.png')
+plt.title('Effect of Isoprenaline on Cardiomyocyte contraction rate (Experiment 1)')
+plt.legend(loc='upper left', bbox_to_anchor=(1, 1), bbox_transform=plt.gcf().transFigure)
+plt.savefig('Isoprenaline intensity 1.png', bbox_inches='tight', dpi=300)
 plt.show()
 
 
