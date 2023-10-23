@@ -145,6 +145,7 @@ def roi_mean_intensity(frame):
     return mean_intensity
 
 
+# Fourier Transform
 def calculate_heart_rate(intensity, label):
     time_intervals = np.linspace(0, 15, 450)
     # Perform FFT on normal_intensity
@@ -156,7 +157,9 @@ def calculate_heart_rate(intensity, label):
     frequencies = fftfreq(num_samples, 1 / sampling_rate)
 
     # Find the index corresponding to the dominant frequency
+    # by only considering the first half of the FFT result (positive values)
     dominant_freq_index = np.argmax(np.abs(fft_result[:num_samples // 2]))
+    print(np.argmax(np.abs(fft_result)))
 
     # Convert the index to frequency in Hz
     dominant_freq_hz = frequencies[dominant_freq_index]
@@ -170,112 +173,18 @@ def calculate_heart_rate(intensity, label):
 # Assuming you have a folder with only TIFF files
 normal = 'D:/ann/Experiment/Isoprenaline/Normal 1/'
 hundred_nM = 'D:/ann/Experiment/Isoprenaline/100 nM Isoprenaline 1/'
-five_hundred_nM = 'D:/ann/Experiment/Isoprenaline/500 nM Isoprenaline 1/'
-one_um = 'D:/ann/Experiment/Isoprenaline/1 um Isoprenaline 1/'
+
 
 # Extract calcium concentration values from the frames
 normal_intensity = [roi_mean_intensity(frame) for frame in frames(normal)]
 hundred_nM_intensity = [roi_mean_intensity(frame) for frame in frames(hundred_nM)]
-five_hundred_nM_intensity = [roi_mean_intensity(frame) for frame in frames(five_hundred_nM)]
-one_um_intensity = [roi_mean_intensity(frame) for frame in frames(one_um)]
 
-
-'''
-float(i)/sum(raw) divides each element by the sum of all the elements in raw. 
-This effectively normalizes each element to be a value between 0 and 1. 
-'''
 normalize1 = [(float(i)/sum(normal_intensity))*100 for i in normal_intensity]
 normalize2 = [(float(i)/sum(hundred_nM_intensity))*100 for i in hundred_nM_intensity]
-normalize3 = [(float(i)/sum(five_hundred_nM_intensity))*100 for i in five_hundred_nM_intensity]
-normalize4 = [(float(i)/sum(one_um_intensity))*100 for i in one_um_intensity]
-
 
 # Calculate heart rates
 heart_rate_normal = calculate_heart_rate(normalize1, 'Normal')
 heart_rate_100nM = calculate_heart_rate(normalize2, '100 nM Isoprenaline')
-heart_rate_500nM = calculate_heart_rate(normalize3, '500 nM Isoprenaline')
-heart_rate_1um = calculate_heart_rate(normalize4, '1 um Isoprenaline')
-print(heart_rate_normal, heart_rate_100nM, heart_rate_500nM, heart_rate_1um)
-
-relative_heart_rate_100nM = (heart_rate_100nM / heart_rate_normal) * 100
-relative_heart_rate_500nM = (heart_rate_500nM / heart_rate_normal) * 100
-relative_heart_rate_1um = (heart_rate_1um / heart_rate_normal) * 100
-
-# Create a bar plot
-concentrations = ['100', '500', '1000']
-relative_heart_rates = [relative_heart_rate_100nM, relative_heart_rate_500nM, relative_heart_rate_1um]
-print(relative_heart_rates)
-plt.bar(concentrations, relative_heart_rates, color=['green', 'purple', 'orange', 'red'])
-plt.xlabel('Concentration (nM)')
-plt.ylabel('Relative Heart Rate (%)')
-plt.title('Relative Heart Rate vs Concentration')
-plt.show()
+print(heart_rate_normal, heart_rate_100nM)
 
 
-'''
-fig, axes = plt.subplots(2, 2, figsize=(10, 8))
-
-# Plot the mean intensities
-axes[0, 0].plot(time_intervals, normalize1, color='green', markersize=1)
-axes[0, 0].set_title('Normal')
-axes[0, 0].set_xlabel('Relative time (sec)')
-axes[0, 0].set_ylabel('Mean Intensities')
-
-axes[0, 1].plot(time_intervals, normalize2, color='purple', markersize=1)
-axes[0, 1].set_title('100 nM Isoprenaline')
-axes[0, 1].set_xlabel('Relative time (sec)')
-axes[0, 1].set_ylabel('Mean Intensities')
-
-axes[1, 0].plot(time_intervals, normalize3, color='orange', markersize=1)
-axes[1, 0].set_title('500 nM Isoprenaline')
-axes[1, 0].set_xlabel('Relative time (sec)')
-axes[1, 0].set_ylabel('Mean Intensities')
-
-axes[1, 1].plot(time_intervals, normalize4, color='red',  markersize=1)
-axes[1, 1].set_title('1 um Isoprenaline')
-axes[1, 1].set_xlabel('Relative time (sec)')
-axes[1, 1].set_ylabel('Mean Intensities')
-
-
-# Isoprenaline increases the force of contraction of the heart muscle.
-# plt.title('Effect of Isoprenaline on Cardiomyocyte contraction rate (Experiment 1)')
-# plt.legend(loc='upper left', bbox_to_anchor=(1, 1), bbox_transform=plt.gcf().transFigure)
-plt.savefig('Isoprenaline intensity 1_normalized.png', bbox_inches='tight', dpi=300)
-plt.show()
-'''
-
-
-'''
-max_value = max(max(normal_intensity), max(hundred_nM_intensity), max(five_hundred_nM_intensity), max(one_um_intensity))
-
-min_value = min(min(normal_intensity), min(hundred_nM_intensity), min(five_hundred_nM_intensity), min(one_um_intensity))
-plt.stackplot(time_intervals, normal_normalized, hundred_nM_normalized, five_hundred_nM_normalized, one_um_normalized,
-              labels=['Normal', '100 nM Isoprenaline', '500 nM Isoprenaline', '1 um E4031'])
-
-
-# frequency
-calculate_frequency(normal_intensity, "Normal")
-calculate_frequency(hundred_nM_intensity, "100 nM")
-calculate_frequency(five_hundred_nM_intensity, "500 nM")
-calculate_frequency(one_um_intensity, "1 um")
-
-
-# Plot the mean intensities
-plt.plot(time_intervals, normal_intensity, color='green', marker='o', markersize=2, label='Normal')
-# plt.plot(time_intervals, hundred_nM_intensity, color='purple', marker='o', markersize=2, label='100 nM Isoprenaline')
-# plt.plot(time_intervals, five_hundred_nM_intensity, color='orange', marker='o', markersize=2, label='500 nM Isoprenaline')
-plt.plot(time_intervals, one_um_intensity, color='red', marker='o', markersize=2, label='1 um E4031')
-plt.xlabel('Relative time (sec)')
-plt.ylabel('Mean Intensities')
-
-
-# Isoprenaline increases the force of contraction of the heart muscle.
-plt.title('Effect of Isoprenaline on Cardiomyocyte contraction rate (Experiment 1)')
-plt.legend()
-plt.savefig('Isoprenaline intensity 1.png')
-plt.show()
-'''
-
-
-# Isoprenaline
-# E4031
