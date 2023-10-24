@@ -145,24 +145,23 @@ def roi_mean_intensity(frame):
     return mean_intensity
 
 
-def calculate_heart_rate(intensity, label):
-    time_intervals = np.linspace(0, 15, 450)
-    # Perform FFT on normal_intensity
-    fft_result = fft(intensity)
+# Fast Fourier Transform (FFT)
+def calculate_heart_rate(intensity):
 
-    # Generate frequencies corresponding to FFT result
-    num_samples = len(intensity)
-    sampling_rate = 1 / (time_intervals[1] - time_intervals[0])
-    frequencies = fftfreq(num_samples, 1 / sampling_rate)
+    # DFT of a signal provides a way to represent that signal in terms of its frequency components
+    spectrum = fft(intensity)
 
-    # Find the index corresponding to the dominant frequency
-    dominant_freq_index = np.argmax(np.abs(fft_result[:num_samples // 2]))
+    num_samples = len(intensity)  # total number of data points or samples in wave.
+    sample_rate = 30  # how many data points are recorded per second
+    frequencies = fftfreq(num_samples, 1 / sample_rate)
 
-    # Convert the index to frequency in Hz
-    dominant_freq_hz = frequencies[dominant_freq_index]
+    # dominant frequency in a signal is the frequency component that has the highest amplitude
+    # Only consider positive frequencies (since the signal is real)
+    positive_freq = frequencies[:num_samples // 2]
+    magnitude = np.abs(spectrum[:num_samples // 2])
+    dominant_frequency = positive_freq[np.argmax(magnitude)]
 
-    # print(f"{label}: {heart_rate_bpm:.3f} BPM")
-    return dominant_freq_hz
+    return dominant_frequency
 
 
 # Baseline < 100 nM Isoprenaline < 500 nM Isoprenaline < 1 µM (or 1000nM) Isoprenaline.
@@ -191,24 +190,26 @@ normalize4 = [(float(i)/sum(one_um_intensity))*100 for i in one_um_intensity]
 
 
 # Calculate heart rates
-heart_rate_normal = calculate_heart_rate(normalize1, 'Normal')
-heart_rate_100nM = calculate_heart_rate(normalize2, '100 nM Isoprenaline')
-heart_rate_500nM = calculate_heart_rate(normalize3, '500 nM Isoprenaline')
-heart_rate_1um = calculate_heart_rate(normalize4, '1 um Isoprenaline')
-print(heart_rate_normal, heart_rate_100nM, heart_rate_500nM, heart_rate_1um)
+heart_rate_normal = calculate_heart_rate(normalize1)
+heart_rate_100nM = calculate_heart_rate(normalize2)
+heart_rate_500nM = calculate_heart_rate(normalize3)
+heart_rate_1um = calculate_heart_rate(normalize4)
 
 relative_heart_rate_100nM = (heart_rate_100nM / heart_rate_normal) * 100
 relative_heart_rate_500nM = (heart_rate_500nM / heart_rate_normal) * 100
 relative_heart_rate_1um = (heart_rate_1um / heart_rate_normal) * 100
 
 # Create a bar plot
-concentrations = ['100', '500', '1000']
-relative_heart_rates = [relative_heart_rate_100nM, relative_heart_rate_500nM, relative_heart_rate_1um]
+concentrations = [0, 100, 500, 1000]
+relative_heart_rates = [heart_rate_normal, heart_rate_100nM, heart_rate_500nM, heart_rate_1um]
 print(relative_heart_rates)
-plt.bar(concentrations, relative_heart_rates, color=['green', 'purple', 'orange', 'red'])
+
+plt.scatter(concentrations, relative_heart_rates, color='green')
 plt.xlabel('Concentration (nM)')
 plt.ylabel('Relative Heart Rate (%)')
 plt.title('Relative Heart Rate vs Concentration')
+# Set the x-axis ticks to be the specific concentrations
+plt.xticks(concentrations)
 plt.show()
 
 

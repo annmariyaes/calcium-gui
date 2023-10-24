@@ -7,9 +7,6 @@ from sklearn import preprocessing
 from scipy.fft import fft, fftfreq
 
 
-time_intervals = np.linspace(0, 15, 450)
-
-
 def frames(folder_path):
     files = [f for f in os.listdir(folder_path) if f.endswith('.tif')]
     files = files[:450]
@@ -145,27 +142,21 @@ def roi_mean_intensity(frame):
     return mean_intensity
 
 
-# Fourier Transform
-def calculate_heart_rate(intensity, label):
-    time_intervals = np.linspace(0, 15, 450)
-    # Perform FFT on normal_intensity
-    fft_result = fft(intensity)
+# Fast Fourier Transform (FFT)
+def calculate_heart_rate(intensity):
+    spectrum = fft(intensity)  # FFT
 
-    # Generate frequencies corresponding to FFT result
-    num_samples = len(intensity)
-    sampling_rate = 1 / (time_intervals[1] - time_intervals[0])
-    frequencies = fftfreq(num_samples, 1 / sampling_rate)
+    num_samples = len(intensity)  # total number of data points or samples in wave.
+    sample_rate = 30  # how many data points are recorded per second
+    frequencies = fftfreq(num_samples, 1 / sample_rate)
 
-    # Find the index corresponding to the dominant frequency
-    # by only considering the first half of the FFT result (positive values)
-    dominant_freq_index = np.argmax(np.abs(fft_result[:num_samples // 2]))
-    print(np.argmax(np.abs(fft_result)))
+    # dominant frequency in a signal is the frequency component that has the highest amplitude
+    # Only consider positive frequencies (since the signal is real)
+    positive_freq = frequencies[:num_samples // 2]
+    magnitude = np.abs(spectrum[:num_samples // 2])
+    dominant_frequency = positive_freq[np.argmax(magnitude)]
 
-    # Convert the index to frequency in Hz
-    dominant_freq_hz = frequencies[dominant_freq_index]
-
-    # print(f"{label}: {heart_rate_bpm:.3f} BPM")
-    return dominant_freq_hz
+    return dominant_frequency
 
 
 # Baseline < 100 nM Isoprenaline < 500 nM Isoprenaline < 1 µM (or 1000nM) Isoprenaline.
@@ -179,12 +170,16 @@ hundred_nM = 'D:/ann/Experiment/Isoprenaline/100 nM Isoprenaline 1/'
 normal_intensity = [roi_mean_intensity(frame) for frame in frames(normal)]
 hundred_nM_intensity = [roi_mean_intensity(frame) for frame in frames(hundred_nM)]
 
+
 normalize1 = [(float(i)/sum(normal_intensity))*100 for i in normal_intensity]
 normalize2 = [(float(i)/sum(hundred_nM_intensity))*100 for i in hundred_nM_intensity]
 
+
+time_intervals = np.linspace(0, 15, 450)
+
 # Calculate heart rates
-heart_rate_normal = calculate_heart_rate(normalize1, 'Normal')
-heart_rate_100nM = calculate_heart_rate(normalize2, '100 nM Isoprenaline')
+heart_rate_normal = calculate_heart_rate(normalize1)
+heart_rate_100nM = calculate_heart_rate(normalize2)
 print(heart_rate_normal, heart_rate_100nM)
 
 
