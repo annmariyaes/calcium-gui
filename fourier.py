@@ -6,8 +6,8 @@ concentrations = [0, 100, 1000]
 heart_rates = [[1.73, 1.13, 1.26], [1.53, 1.33, 1.33], [0.8, 0.73, 0.53]]
 
 # The number of times heartbeats in 60 seconds = 72 times
-# 72/60 = 1.2 times heartbeats every second
-relative_heart_rates = [[(h / 1.2) * 100 for h in r] for r in heart_rates]
+# 72/60 = 1.25 times heartbeats per second
+relative_heart_rates = [[(h / 1.25) * 100 for h in r] for r in heart_rates]
 print(relative_heart_rates)
 
 for i, rates in enumerate(relative_heart_rates):
