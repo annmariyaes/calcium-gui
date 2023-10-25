@@ -5,10 +5,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.signal import find_peaks
 
-data = 'D:/ann/Experiment/Isoprenaline/1 um Isoprenaline 1/'
+data = 'D:/ann/Experiment/Isoprenaline/100 nM Isoprenaline 1/'
 
 files = [f for f in os.listdir(data) if f.endswith('.tif')]
-files = files[:5]
+files = files[100:150]
+print(len(files))
 
 surface_area = []
 mean_intensities = []
@@ -58,9 +59,9 @@ for file_name in files:
     '''
     _, threshold_frame = cv2.threshold(erode_frame, 12, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
 
-    cv2.imshow('Threshold', threshold_frame)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+    # cv2.imshow('Threshold', threshold_frame)
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
 
     '''
     Contours are curve joining all the continuous points (along the boundary), having same color or intensity.

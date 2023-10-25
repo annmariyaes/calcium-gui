@@ -148,6 +148,9 @@ def roi_mean_intensity(frame):
 # Fast Fourier Transform (FFT)
 def calculate_heart_rate(intensity):
 
+    # graph of your waveform doesn't start from zero, it implies that there is a DC offset in your signal
+    intensity -= np.mean(intensity)
+
     # DFT of a signal provides a way to represent that signal in terms of its frequency components
     spectrum = fft(intensity)
 
@@ -164,53 +167,69 @@ def calculate_heart_rate(intensity):
     return dominant_frequency
 
 
-# Baseline < 100 nM Isoprenaline < 500 nM Isoprenaline < 1 µM (or 1000nM) Isoprenaline.
+def process_organoids(conc0, conc1, conc2, conc3):
+    # Extract calcium concentration values from the frames
+    conc0_intensity = [roi_mean_intensity(frame) for frame in frames(conc0)]
+    conc1_intensity = [roi_mean_intensity(frame) for frame in frames(conc1)]
+    conc2_intensity = [roi_mean_intensity(frame) for frame in frames(conc2)]
+    conc3_intensity = [roi_mean_intensity(frame) for frame in frames(conc3)]
+
+    # float(i)/sum(raw) divides each element by the sum of all the elements in raw
+    # This effectively normalizes each element to be a value between 0 and 1.
+    normalize1 = [(float(i) / sum(conc0_intensity)) * 100 for i in conc0_intensity]
+    normalize2 = [(float(i) / sum(conc1_intensity)) * 100 for i in conc1_intensity]
+    normalize3 = [(float(i) / sum(conc2_intensity)) * 100 for i in conc2_intensity]
+    normalize4 = [(float(i) / sum(conc3_intensity)) * 100 for i in conc3_intensity]
+
+    # Calculate heart rates
+    heart_rate_conc0 = calculate_heart_rate(normalize1)
+    heart_rate_conc1 = calculate_heart_rate(normalize2)
+    heart_rate_conc2 = calculate_heart_rate(normalize3)
+    heart_rate_conc3 = calculate_heart_rate(normalize4)
+
+    return [heart_rate_conc0, heart_rate_conc1, heart_rate_conc2, heart_rate_conc3]
+
+
+def plot_heart_rates(concentrations, heart_rates):
+    relative_heart_rates = [[(h / 1.2) * 100 for h in r] for r in heart_rates]
+    print(relative_heart_rates)
+
+    for i, heart_rate in enumerate(heart_rates):
+        plt.scatter(concentrations, heart_rate, marker='o', label=f'Organoid {i+1}')
+    plt.xlabel('Concentration (nM)')
+    plt.ylabel('Heart Rate (Hz)')
+    plt.title('Nifedifine')
+    plt.legend()
+    plt.xticks(concentrations)
+    plt.savefig('Nifedifine heart rate.png')
+    # Isoprenaline
+    # Nifedifine
+    plt.show()
+
+
+concentrations = [0, 100, 1000, 10000]
 
 # Assuming you have a folder with only TIFF files
-normal = 'D:/ann/Experiment/Isoprenaline/Normal 1/'
-hundred_nM = 'D:/ann/Experiment/Isoprenaline/100 nM Isoprenaline 1/'
-five_hundred_nM = 'D:/ann/Experiment/Isoprenaline/500 nM Isoprenaline 1/'
-one_um = 'D:/ann/Experiment/Isoprenaline/1 um Isoprenaline 1/'
-
-# Extract calcium concentration values from the frames
-normal_intensity = [roi_mean_intensity(frame) for frame in frames(normal)]
-hundred_nM_intensity = [roi_mean_intensity(frame) for frame in frames(hundred_nM)]
-five_hundred_nM_intensity = [roi_mean_intensity(frame) for frame in frames(five_hundred_nM)]
-one_um_intensity = [roi_mean_intensity(frame) for frame in frames(one_um)]
-
-
 '''
-float(i)/sum(raw) divides each element by the sum of all the elements in raw. 
-This effectively normalizes each element to be a value between 0 and 1. 
+organoids = [
+    ('D:/ann/Experiment/Isoprenaline/Normal 1/', 'D:/ann/Experiment/Isoprenaline/100 nM Isoprenaline 1/', 'D:/ann/Experiment/Isoprenaline/500 nM Isoprenaline 1/', 'D:/ann/Experiment/Isoprenaline/1 uM Isoprenaline 1/'),
+    ('D:/ann/Experiment/Isoprenaline/Normal 2/', 'D:/ann/Experiment/Isoprenaline/100 nM Isoprenaline 2/', 'D:/ann/Experiment/Isoprenaline/500 nM Isoprenaline 2/', 'D:/ann/Experiment/Isoprenaline/1 uM Isoprenaline 2/'),
+    ('D:/ann/Experiment/Isoprenaline/Normal 3/', 'D:/ann/Experiment/Isoprenaline/100 nM Isoprenaline 3/', 'D:/ann/Experiment/Isoprenaline/500 nM Isoprenaline 3/', 'D:/ann/Experiment/Isoprenaline/1 uM Isoprenaline 3/')
+]
 '''
-normalize1 = [(float(i)/sum(normal_intensity))*100 for i in normal_intensity]
-normalize2 = [(float(i)/sum(hundred_nM_intensity))*100 for i in hundred_nM_intensity]
-normalize3 = [(float(i)/sum(five_hundred_nM_intensity))*100 for i in five_hundred_nM_intensity]
-normalize4 = [(float(i)/sum(one_um_intensity))*100 for i in one_um_intensity]
+
+organoids = [
+    ('D:/ann/Experiment/Nifedifine/Normal 1/', 'D:/ann/Experiment/Nifedifine/100 nM Nifedifine 1/', 'D:/ann/Experiment/Nifedifine/1 uM Nifedifine 1/', 'D:/ann/Experiment/Nifedifine/10 uM Nifedifine 1/'),
+    ('D:/ann/Experiment/Nifedifine/Normal 2/', 'D:/ann/Experiment/Nifedifine/100 nM Nifedifine 2/', 'D:/ann/Experiment/Nifedifine/1 uM Nifedifine 2/', 'D:/ann/Experiment/Nifedifine/10 uM Nifedifine 2/'),
+    ('D:/ann/Experiment/Nifedifine/Normal 3/', 'D:/ann/Experiment/Nifedifine/100 nM Nifedifine 3/', 'D:/ann/Experiment/Nifedifine/1 uM Nifedifine 3/', 'D:/ann/Experiment/Nifedifine/10 uM Nifedifine 3/')
+    ]
+
+heart_rates = [process_organoids(*organoid) for organoid in organoids]
+print(heart_rates)
+
+plot_heart_rates(concentrations, heart_rates)
 
 
-# Calculate heart rates
-heart_rate_normal = calculate_heart_rate(normalize1)
-heart_rate_100nM = calculate_heart_rate(normalize2)
-heart_rate_500nM = calculate_heart_rate(normalize3)
-heart_rate_1um = calculate_heart_rate(normalize4)
-
-relative_heart_rate_100nM = (heart_rate_100nM / heart_rate_normal) * 100
-relative_heart_rate_500nM = (heart_rate_500nM / heart_rate_normal) * 100
-relative_heart_rate_1um = (heart_rate_1um / heart_rate_normal) * 100
-
-# Create a bar plot
-concentrations = [0, 100, 500, 1000]
-relative_heart_rates = [heart_rate_normal, heart_rate_100nM, heart_rate_500nM, heart_rate_1um]
-print(relative_heart_rates)
-
-plt.scatter(concentrations, relative_heart_rates, color='green')
-plt.xlabel('Concentration (nM)')
-plt.ylabel('Relative Heart Rate (%)')
-plt.title('Relative Heart Rate vs Concentration')
-# Set the x-axis ticks to be the specific concentrations
-plt.xticks(concentrations)
-plt.show()
 
 
 '''
@@ -239,8 +258,6 @@ axes[1, 1].set_ylabel('Mean Intensities')
 
 
 # Isoprenaline increases the force of contraction of the heart muscle.
-# plt.title('Effect of Isoprenaline on Cardiomyocyte contraction rate (Experiment 1)')
-# plt.legend(loc='upper left', bbox_to_anchor=(1, 1), bbox_transform=plt.gcf().transFigure)
 plt.savefig('Isoprenaline intensity 1_normalized.png', bbox_inches='tight', dpi=300)
 plt.show()
 '''

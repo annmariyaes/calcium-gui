@@ -144,17 +144,43 @@ def roi_mean_intensity(frame):
 
 # Fast Fourier Transform (FFT)
 def calculate_heart_rate(intensity):
-    spectrum = fft(intensity)  # FFT
+    time_intervals = np.linspace(0, 15, 450)
+
+    # graph of your waveform doesn't start from zero, it implies that there is a DC offset in your signal
+    intensity -= np.mean(intensity)
 
     num_samples = len(intensity)  # total number of data points or samples in wave.
     sample_rate = 30  # how many data points are recorded per second
     frequencies = fftfreq(num_samples, 1 / sample_rate)
 
+    spectrum = fft(intensity)  # FFT
+
     # dominant frequency in a signal is the frequency component that has the highest amplitude
     # Only consider positive frequencies (since the signal is real)
-    positive_freq = frequencies[:num_samples // 2]
+    # print(frequencies[:num_samples // 2])
+    positive_freq = frequencies[:num_samples // 2]  # Exclude the zero frequency component
     magnitude = np.abs(spectrum[:num_samples // 2])
+
     dominant_frequency = positive_freq[np.argmax(magnitude)]
+    print(positive_freq)
+    print(magnitude)
+
+    plt.figure(figsize=(12, 4))
+    plt.subplot(121)
+
+    plt.plot(time_intervals, intensity, color='green', markersize=1)
+    plt.title('Intensity wave')
+    plt.xlabel('Relative time (sec)')
+    plt.ylabel('Mean Intensities')
+
+    plt.subplot(122)
+    plt.plot(frequencies, np.abs(spectrum), color='purple')
+    plt.title('Fourier Transform')
+    plt.xlabel('Frequency (Hz)')
+    plt.ylabel('Amplitude')
+
+    plt.tight_layout()
+    plt.show()
 
     return dominant_frequency
 
@@ -162,24 +188,27 @@ def calculate_heart_rate(intensity):
 # Baseline < 100 nM Isoprenaline < 500 nM Isoprenaline < 1 µM (or 1000nM) Isoprenaline.
 
 # Assuming you have a folder with only TIFF files
-normal = 'D:/ann/Experiment/Isoprenaline/Normal 1/'
-hundred_nM = 'D:/ann/Experiment/Isoprenaline/100 nM Isoprenaline 1/'
+'''
+normal = 'D:/ann/Experiment/Nifedifine/Normal 1/'
+hundred_nM = 'D:/ann/Experiment/Nifedifine/100 nM Nifedifine 1/'
+one_uM = 'D:/ann/Experiment/Nifedifine/1 uM Nifedifine 1/'
+ten_uM = 'D:/ann/Experiment/Nifedifine/10 uM Nifedifine 1/'
+'''
 
+normal = 'D:/ann/Experiment/Isoprenaline/Normal 3/'
+hundred_nM = 'D:/ann/Experiment/Isoprenaline/100 nM Isoprenaline 3/'
+five_hundred_nM = 'D:/ann/Experiment/Isoprenaline/500 nM Isoprenaline 3/'
+one_um = 'D:/ann/Experiment/Isoprenaline/1 um Isoprenaline 3/'
 
 # Extract calcium concentration values from the frames
-normal_intensity = [roi_mean_intensity(frame) for frame in frames(normal)]
-hundred_nM_intensity = [roi_mean_intensity(frame) for frame in frames(hundred_nM)]
-
-
-normalize1 = [(float(i)/sum(normal_intensity))*100 for i in normal_intensity]
-normalize2 = [(float(i)/sum(hundred_nM_intensity))*100 for i in hundred_nM_intensity]
-
-
-time_intervals = np.linspace(0, 15, 450)
+intensity = [roi_mean_intensity(frame) for frame in frames(one_um)]
+# normalize = [(float(i)/sum(intensity))*100 for i in intensity]
+normalize = [2 * ((x - min(intensity)) / (max(intensity) - min(intensity))) - 1 for x in intensity]
 
 # Calculate heart rates
-heart_rate_normal = calculate_heart_rate(normalize1)
-heart_rate_100nM = calculate_heart_rate(normalize2)
-print(heart_rate_normal, heart_rate_100nM)
+heart_rate = calculate_heart_rate(normalize)
+print(heart_rate)
+
+
 
 
