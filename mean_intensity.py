@@ -7,12 +7,12 @@ from sklearn import preprocessing
 from scipy.fft import fft, fftfreq
 
 
-time_intervals = np.linspace(0, 15, 450)
+time_intervals = np.linspace(0, 10, 450)
 
 
 def frames(folder_path):
     files = [f for f in os.listdir(folder_path) if f.endswith('.tif')]
-    files = files[:450]
+    files = files[100:550]
 
     frames = []
     for file in files:
@@ -181,6 +181,35 @@ def process_organoids(conc0, conc1, conc2, conc3):
     normalize3 = [(float(i) / sum(conc2_intensity)) * 100 for i in conc2_intensity]
     normalize4 = [(float(i) / sum(conc3_intensity)) * 100 for i in conc3_intensity]
 
+    fig, axes = plt.subplots(2, 2, figsize=(10, 8))
+    # Isoprenaline
+    # Nifedifine
+    # E4031
+    # BPA
+
+    # Plot the mean intensities
+    axes[0, 0].plot(time_intervals, normalize1, color='green', markersize=1)
+    axes[0, 0].set_title('Normal')
+    axes[0, 0].set_xlabel('Relative time (sec)')
+    axes[0, 0].set_ylabel('Mean Intensities')
+
+    axes[0, 1].plot(time_intervals, normalize2, color='purple', markersize=1)
+    axes[0, 1].set_title('100 nM Isoprenaline')
+    axes[0, 1].set_xlabel('Relative time (sec)')
+    axes[0, 1].set_ylabel('Mean Intensities')
+
+    axes[1, 0].plot(time_intervals, normalize3, color='orange', markersize=1)
+    axes[1, 0].set_title('500 nM Isoprenaline')
+    axes[1, 0].set_xlabel('Relative time (sec)')
+    axes[1, 0].set_ylabel('Mean Intensities')
+
+    axes[1, 1].plot(time_intervals, normalize4, color='red', markersize=1)
+    axes[1, 1].set_title('1000 nM Isoprenaline')
+    axes[1, 1].set_xlabel('Relative time (sec)')
+    axes[1, 1].set_ylabel('Mean Intensities')
+
+    plt.show()
+
     # Calculate heart rates
     heart_rate_conc0 = calculate_heart_rate(normalize1)
     heart_rate_conc1 = calculate_heart_rate(normalize2)
@@ -191,76 +220,43 @@ def process_organoids(conc0, conc1, conc2, conc3):
 
 
 def plot_heart_rates(concentrations, heart_rates):
-    relative_heart_rates = [[(h / 1.2) * 100 for h in r] for r in heart_rates]
-    print(relative_heart_rates)
 
     for i, heart_rate in enumerate(heart_rates):
         plt.scatter(concentrations, heart_rate, marker='o', label=f'Organoid {i+1}')
     plt.xlabel('Concentration (nM)')
     plt.ylabel('Heart Rate (Hz)')
-    plt.title('Nifedifine')
+    plt.title('Isoprenaline')
     plt.legend()
     plt.xticks(concentrations)
-    plt.savefig('Nifedifine heart rate.png')
+    plt.savefig('Isoprenaline heart rate.png')
     # Isoprenaline
     # Nifedifine
+    # E4031
+    # BPA
     plt.show()
 
 
-concentrations = [0, 100, 1000, 10000]
+concentrations = ['0', '100', '500', '1000']
 
 # Assuming you have a folder with only TIFF files
-'''
+
 organoids = [
     ('D:/ann/Experiment/Isoprenaline/Normal 1/', 'D:/ann/Experiment/Isoprenaline/100 nM Isoprenaline 1/', 'D:/ann/Experiment/Isoprenaline/500 nM Isoprenaline 1/', 'D:/ann/Experiment/Isoprenaline/1 uM Isoprenaline 1/'),
     ('D:/ann/Experiment/Isoprenaline/Normal 2/', 'D:/ann/Experiment/Isoprenaline/100 nM Isoprenaline 2/', 'D:/ann/Experiment/Isoprenaline/500 nM Isoprenaline 2/', 'D:/ann/Experiment/Isoprenaline/1 uM Isoprenaline 2/'),
     ('D:/ann/Experiment/Isoprenaline/Normal 3/', 'D:/ann/Experiment/Isoprenaline/100 nM Isoprenaline 3/', 'D:/ann/Experiment/Isoprenaline/500 nM Isoprenaline 3/', 'D:/ann/Experiment/Isoprenaline/1 uM Isoprenaline 3/')
 ]
 '''
-
 organoids = [
     ('D:/ann/Experiment/Nifedifine/Normal 1/', 'D:/ann/Experiment/Nifedifine/100 nM Nifedifine 1/', 'D:/ann/Experiment/Nifedifine/1 uM Nifedifine 1/', 'D:/ann/Experiment/Nifedifine/10 uM Nifedifine 1/'),
     ('D:/ann/Experiment/Nifedifine/Normal 2/', 'D:/ann/Experiment/Nifedifine/100 nM Nifedifine 2/', 'D:/ann/Experiment/Nifedifine/1 uM Nifedifine 2/', 'D:/ann/Experiment/Nifedifine/10 uM Nifedifine 2/'),
     ('D:/ann/Experiment/Nifedifine/Normal 3/', 'D:/ann/Experiment/Nifedifine/100 nM Nifedifine 3/', 'D:/ann/Experiment/Nifedifine/1 uM Nifedifine 3/', 'D:/ann/Experiment/Nifedifine/10 uM Nifedifine 3/')
     ]
+'''
 
 heart_rates = [process_organoids(*organoid) for organoid in organoids]
 print(heart_rates)
 
 plot_heart_rates(concentrations, heart_rates)
-
-
-
-
-'''
-fig, axes = plt.subplots(2, 2, figsize=(10, 8))
-
-# Plot the mean intensities
-axes[0, 0].plot(time_intervals, normalize1, color='green', markersize=1)
-axes[0, 0].set_title('Normal')
-axes[0, 0].set_xlabel('Relative time (sec)')
-axes[0, 0].set_ylabel('Mean Intensities')
-
-axes[0, 1].plot(time_intervals, normalize2, color='purple', markersize=1)
-axes[0, 1].set_title('100 nM Isoprenaline')
-axes[0, 1].set_xlabel('Relative time (sec)')
-axes[0, 1].set_ylabel('Mean Intensities')
-
-axes[1, 0].plot(time_intervals, normalize3, color='orange', markersize=1)
-axes[1, 0].set_title('500 nM Isoprenaline')
-axes[1, 0].set_xlabel('Relative time (sec)')
-axes[1, 0].set_ylabel('Mean Intensities')
-
-axes[1, 1].plot(time_intervals, normalize4, color='red',  markersize=1)
-axes[1, 1].set_title('1 um Isoprenaline')
-axes[1, 1].set_xlabel('Relative time (sec)')
-axes[1, 1].set_ylabel('Mean Intensities')
-
-
-# Isoprenaline increases the force of contraction of the heart muscle.
-plt.savefig('Isoprenaline intensity 1_normalized.png', bbox_inches='tight', dpi=300)
-plt.show()
-'''
 
 
 '''
@@ -295,5 +291,5 @@ plt.show()
 '''
 
 
-# Isoprenaline
-# E4031
+
+

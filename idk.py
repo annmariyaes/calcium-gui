@@ -9,7 +9,8 @@ from scipy.fft import fft, fftfreq
 
 def frames(folder_path):
     files = [f for f in os.listdir(folder_path) if f.endswith('.tif')]
-    files = files[:450]
+    files = files[90:390]
+    print(len(files))
 
     frames = []
     for file in files:
@@ -144,7 +145,7 @@ def roi_mean_intensity(frame):
 
 # Fast Fourier Transform (FFT)
 def calculate_heart_rate(intensity):
-    time_intervals = np.linspace(0, 15, 450)
+    time_intervals = np.linspace(0, 15, 300)
 
     # graph of your waveform doesn't start from zero, it implies that there is a DC offset in your signal
     intensity -= np.mean(intensity)
@@ -189,21 +190,21 @@ def calculate_heart_rate(intensity):
 
 # Assuming you have a folder with only TIFF files
 '''
-normal = 'D:/ann/Experiment/Nifedifine/Normal 1/'
-hundred_nM = 'D:/ann/Experiment/Nifedifine/100 nM Nifedifine 1/'
-one_uM = 'D:/ann/Experiment/Nifedifine/1 uM Nifedifine 1/'
-ten_uM = 'D:/ann/Experiment/Nifedifine/10 uM Nifedifine 1/'
+normal = 'D:/ann/Experiment/Nifedifine/Normal 2/'
+hundred_nM = 'D:/ann/Experiment/Nifedifine/100 nM Nifedifine 2/'
+one_uM = 'D:/ann/Experiment/Nifedifine/1 uM Nifedifine 2/'
+ten_uM = 'D:/ann/Experiment/Nifedifine/10 uM Nifedifine 2/'
 '''
 
-normal = 'D:/ann/Experiment/Isoprenaline/Normal 3/'
-hundred_nM = 'D:/ann/Experiment/Isoprenaline/100 nM Isoprenaline 3/'
-five_hundred_nM = 'D:/ann/Experiment/Isoprenaline/500 nM Isoprenaline 3/'
-one_um = 'D:/ann/Experiment/Isoprenaline/1 um Isoprenaline 3/'
+normal = 'D:/ann/Experiment/Isoprenaline/Normal 2/'
+hundred_nM = 'D:/ann/Experiment/Isoprenaline/100 nM Isoprenaline 2/'
+five_hundred_nM = 'D:/ann/Experiment/Isoprenaline/500 nM Isoprenaline 2/'
+one_um = 'D:/ann/Experiment/Isoprenaline/1 um Isoprenaline 2/'
 
 # Extract calcium concentration values from the frames
 intensity = [roi_mean_intensity(frame) for frame in frames(one_um)]
-# normalize = [(float(i)/sum(intensity))*100 for i in intensity]
-normalize = [2 * ((x - min(intensity)) / (max(intensity) - min(intensity))) - 1 for x in intensity]
+normalize = [(float(i)/sum(intensity))*100 for i in intensity]
+# normalize = [2 * ((x - min(intensity)) / (max(intensity) - min(intensity))) - 1 for x in normal]
 
 # Calculate heart rates
 heart_rate = calculate_heart_rate(normalize)

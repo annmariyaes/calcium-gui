@@ -2,8 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-concentrations = [0, 100, 1000]
-heart_rates = [[1.73, 1.13, 1.26], [1.53, 1.33, 1.33], [0.8, 0.73, 0.53]]
+concentrations = ['0', '100', '1000', '10000']
+heart_rates = [[1.2, 1.8, 1.86, 1.33], [1.33, 2.13, 0.06, 0.06], [1.6, 1.4, 2.0, 1.93]]
 
 # The number of times heartbeats in 60 seconds = 72 times
 # 72/60 = 1.25 times heartbeats per second
