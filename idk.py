@@ -1,27 +1,34 @@
 import os
 import cv2
-import math
 import numpy as np
 import matplotlib.pyplot as plt
-from sklearn import preprocessing
 from scipy.fft import fft, fftfreq
+import time
+from concurrent.futures import ThreadPoolExecutor
+
+start_time = time.time()
 
 
 def frames(folder_path):
+    """
+    :param folder_path: path of each frame
+    :return frames: all frames in one folder
+    """
+    # Assuming you have a folder with only TIFF files
     files = [f for f in os.listdir(folder_path) if f.endswith('.tif')]
-    files = files[90:390]
-    print(len(files))
+    files = files[100:550]  # 450 frames
 
-    frames = []
     for file in files:
         image_path = os.path.join(folder_path, file)
         frame = cv2.imread(image_path)
-        frames.append(frame)
-
-    return frames
+        yield frame
 
 
 def calcium_mean_intensity(frame):
+    """
+    :param frame: path of each frame
+    :return calcium_intensity: pixel intensity of entire image (not particularly segmented or ROI)
+    """
     gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
     '''
@@ -65,7 +72,12 @@ def calcium_mean_intensity(frame):
     return calcium_intensity
 
 
+# Proper segmentation of ROI
 def roi_mean_intensity(frame):
+    """
+    :param frame: path of that frame
+    :return calcium_intensity: mean pixel intensity of ROI in that frame
+    """
     gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
     '''
@@ -91,8 +103,7 @@ def roi_mean_intensity(frame):
     Used to close small holes or gaps in objects and join objects that are close to each other.
     '''
     kernel = np.ones((5, 5), np.uint8)  # kernel size is very sensitive!!!!
-    dilate_frame = cv2.dilate(clahe_frame, kernel, iterations=4)  # joining broken parts of an object.
-    erode_frame = cv2.erode(dilate_frame, kernel, iterations=5)  # for removing small white noises
+    erode_frame = cv2.erode(cv2.dilate(clahe_frame, kernel, iterations=4), kernel, iterations=5)
 
     # Region of Interest (ROI) Selection
     '''
@@ -111,11 +122,9 @@ def roi_mean_intensity(frame):
     '''
     contours_frame, _ = cv2.findContours(threshold_frame, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
 
-    mean_intensities = []
-    for i, contour in enumerate(contours_frame):
+    for contour in contours_frame:
         # area in square pixels
         area_pixels = cv2.contourArea(contour)
-        print()
 
         if area_pixels > 10000:
             # print(area_pixels)
@@ -135,81 +144,116 @@ def roi_mean_intensity(frame):
             # Access the image pixels with white and create a 1D numpy array then add to list
             pts = np.where(mask == 255)
             mean_intensity = np.mean(frame[pts[0], pts[1]])
-            mean_intensities.append(mean_intensity)
 
-            # extract the raw fluorescence within each object per frame, as the sum of all pixels in each object
-            fluorescent_cal_trace = np.sum(frame[pts[0], pts[1]])
-
-    return mean_intensity
+            return mean_intensity
 
 
 # Fast Fourier Transform (FFT)
 def calculate_heart_rate(intensity):
-    time_intervals = np.linspace(0, 15, 300)
+    """
+    :param intensity: mean pixel intensity of all frames in a particular concentration
+    :return: frequency of that intensity
+    """
 
     # graph of your waveform doesn't start from zero, it implies that there is a DC offset in your signal
     intensity -= np.mean(intensity)
+
+    # DFT of a signal provides a way to represent that signal in terms of its frequency components
+    spectrum = fft(intensity)
 
     num_samples = len(intensity)  # total number of data points or samples in wave.
     sample_rate = 30  # how many data points are recorded per second
     frequencies = fftfreq(num_samples, 1 / sample_rate)
 
-    spectrum = fft(intensity)  # FFT
-
     # dominant frequency in a signal is the frequency component that has the highest amplitude
     # Only consider positive frequencies (since the signal is real)
-    # print(frequencies[:num_samples // 2])
-    positive_freq = frequencies[:num_samples // 2]  # Exclude the zero frequency component
+    positive_freq = frequencies[:num_samples // 2]
     magnitude = np.abs(spectrum[:num_samples // 2])
-
     dominant_frequency = positive_freq[np.argmax(magnitude)]
-    print(positive_freq)
-    print(magnitude)
-
-    plt.figure(figsize=(12, 4))
-    plt.subplot(121)
-
-    plt.plot(time_intervals, intensity, color='green', markersize=1)
-    plt.title('Intensity wave')
-    plt.xlabel('Relative time (sec)')
-    plt.ylabel('Mean Intensities')
-
-    plt.subplot(122)
-    plt.plot(frequencies, np.abs(spectrum), color='purple')
-    plt.title('Fourier Transform')
-    plt.xlabel('Frequency (Hz)')
-    plt.ylabel('Amplitude')
-
-    plt.tight_layout()
-    plt.show()
 
     return dominant_frequency
 
 
-# Baseline < 100 nM Isoprenaline < 500 nM Isoprenaline < 1 µM (or 1000nM) Isoprenaline.
+def process_concentration(concentration):
+    pixel_intensity = [roi_mean_intensity(frame) for frame in frames(concentration)]
+    # divides each element by the sum of all the elements in raw.
+    # This effectively normalizes each element to be a value between 0 and 1.
+    total_intensity = np.sum(pixel_intensity)
+    normalized = [(concentration / total_intensity) * 100 for concentration in pixel_intensity]
+    return normalized, calculate_heart_rate(normalized)
 
-# Assuming you have a folder with only TIFF files
+
+# code optimization
+def process_organoids(*concentrations):
+    with ThreadPoolExecutor() as executor:
+        results = executor.map(process_concentration, concentrations)
+    return list(results)
+
+
+# Isoprenaline
+# Nifedifine
+# E4031
+# BPA
+
+concentrations = ['0', '100', '500', '1000']
+organoids = [
+    ('D:/ann/Experiment/Isoprenaline/Normal 1/', 'D:/ann/Experiment/Isoprenaline/100 nM Isoprenaline 1/', 'D:/ann/Experiment/Isoprenaline/500 nM Isoprenaline 1/', 'D:/ann/Experiment/Isoprenaline/1 uM Isoprenaline 1/'),
+    ('D:/ann/Experiment/Isoprenaline/Normal 2/', 'D:/ann/Experiment/Isoprenaline/100 nM Isoprenaline 2/', 'D:/ann/Experiment/Isoprenaline/500 nM Isoprenaline 2/', 'D:/ann/Experiment/Isoprenaline/1 uM Isoprenaline 2/'),
+    ('D:/ann/Experiment/Isoprenaline/Normal 3/', 'D:/ann/Experiment/Isoprenaline/100 nM Isoprenaline 3/', 'D:/ann/Experiment/Isoprenaline/500 nM Isoprenaline 3/', 'D:/ann/Experiment/Isoprenaline/1 uM Isoprenaline 3/')
+]
 '''
-normal = 'D:/ann/Experiment/Nifedifine/Normal 2/'
-hundred_nM = 'D:/ann/Experiment/Nifedifine/100 nM Nifedifine 2/'
-one_uM = 'D:/ann/Experiment/Nifedifine/1 uM Nifedifine 2/'
-ten_uM = 'D:/ann/Experiment/Nifedifine/10 uM Nifedifine 2/'
+concentrations = ['0', '100', '1000', '10000']
+organoids = [
+    ('D:/ann/Experiment/Nifedifine/Normal 1/', 'D:/ann/Experiment/Nifedifine/100 nM Nifedifine 1/', 'D:/ann/Experiment/Nifedifine/1 uM Nifedifine 1/', 'D:/ann/Experiment/Nifedifine/10 uM Nifedifine 1/'),
+    ('D:/ann/Experiment/Nifedifine/Normal 2/', 'D:/ann/Experiment/Nifedifine/100 nM Nifedifine 2/', 'D:/ann/Experiment/Nifedifine/1 uM Nifedifine 2/', 'D:/ann/Experiment/Nifedifine/10 uM Nifedifine 2/'),
+    ('D:/ann/Experiment/Nifedifine/Normal 3/', 'D:/ann/Experiment/Nifedifine/100 nM Nifedifine 3/', 'D:/ann/Experiment/Nifedifine/1 uM Nifedifine 3/', 'D:/ann/Experiment/Nifedifine/10 uM Nifedifine 3/')
+    ]
 '''
 
-normal = 'D:/ann/Experiment/Isoprenaline/Normal 2/'
-hundred_nM = 'D:/ann/Experiment/Isoprenaline/100 nM Isoprenaline 2/'
-five_hundred_nM = 'D:/ann/Experiment/Isoprenaline/500 nM Isoprenaline 2/'
-one_um = 'D:/ann/Experiment/Isoprenaline/1 um Isoprenaline 2/'
+heart_rates = []
+time_intervals = np.linspace(0, 10, 450)
+colors = ['green', 'purple', 'orange', 'red']  # Define colors for each organoid
 
-# Extract calcium concentration values from the frames
-intensity = [roi_mean_intensity(frame) for frame in frames(one_um)]
-normalize = [(float(i)/sum(intensity))*100 for i in intensity]
-# normalize = [2 * ((x - min(intensity)) / (max(intensity) - min(intensity))) - 1 for x in normal]
+for i, organoid in enumerate(organoids):
 
-# Calculate heart rates
-heart_rate = calculate_heart_rate(normalize)
-print(heart_rate)
+    mean_pixel_intensity, heart_rate = zip(*process_organoids(*organoid))
+
+    # Plot the mean intensities
+    fig, axes = plt.subplots(2, 2, figsize=(10, 8))
+
+    for j, intensity in enumerate(mean_pixel_intensity):
+        # print(organoid[j].split('/')[-2])
+        axes[j // 2, j % 2].plot(time_intervals, intensity, color=colors[j], markersize=1)
+        axes[j // 2, j % 2].set_title(organoid[j].split('/')[-2])
+        axes[j // 2, j % 2].set_xlabel('Time (sec)')
+        axes[j // 2, j % 2].set_ylabel('Mean Intensities (pixels)')
+
+    # Adjust layout to prevent overlap
+    plt.tight_layout()
+    plt.savefig(organoid[0].split('/')[-3] + ' intensity ' + str(i + 1))
+    plt.close()
+
+    heart_rates.append(heart_rate)
+
+# plot of heart rate vs concentration
+for r, heart_rate in enumerate(heart_rates):
+    plt.scatter(concentrations, heart_rate, marker='o', label=f'Organoid {r + 1}')
+plt.xlabel('Concentration (nM)')
+plt.ylabel('Heart Rate (Hz)')
+title = organoids[0][0].split('/')[-3]
+plt.title(title)
+plt.legend()
+plt.xticks(concentrations)
+plt.savefig(title + ' heart rate.png')
+plt.close()
 
 
+end_time = time.time()
+execution_time = end_time - start_time
 
+print(f"Execution time: {execution_time} seconds")
+
+
+'''
+'''
 

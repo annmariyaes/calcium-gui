@@ -3,10 +3,7 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.fft import fft, fftfreq
-import time
 from concurrent.futures import ThreadPoolExecutor
-
-start_time = time.time()
 
 
 def frames(folder_path):
@@ -22,54 +19,6 @@ def frames(folder_path):
         image_path = os.path.join(folder_path, file)
         frame = cv2.imread(image_path)
         yield frame
-
-
-def calcium_mean_intensity(frame):
-    """
-    :param frame: path of each frame
-    :return calcium_intensity: pixel intensity of entire image (not particularly segmented or ROI)
-    """
-    gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-
-    '''
-    Gaussian blurring is highly effective in removing Gaussian noise from an image.
-    We should specify the width and height of the kernel which should be positive and odd. 
-    '''
-    blur = cv2.GaussianBlur(gray_frame, (5, 5), 0)
-
-    '''
-    Contrast Limited Adaptive Histogram Equalization (CLAHE)
-    CLAHE is a variant of Adaptive histogram equalization which takes care of over-amplification of the contrast. 
-    CLAHE operates on small regions in the image, called tiles, rather than the entire image. 
-    The neighboring tiles are then combined using bilinear interpolation to remove the artificial boundaries. 
-    Usually it is applied on the luminance channel
-    '''
-    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
-    clahe = clahe.apply(blur)
-
-    '''
-    Combination of dilation followed by erosion, known as morphological closing.
-    Erosion basically strips out the outermost layer of pixels in a structure, 
-    where as dilation adds an extra layer of pixels on a structure.
-    Used to close small holes or gaps in objects and join objects that are close to each other.
-    '''
-    kernel = np.ones((5, 5), np.uint8)
-    dilate = cv2.dilate(clahe, kernel, iterations=4)
-    erode = cv2.erode(dilate, kernel, iterations=5)
-
-    '''
-    Thresholding is a process of converting a grayscale image into a binary image, 
-    where pixels are classified into two groups based on intensity values: 
-    those above a certain threshold value and those below.
-    cv2.THRESH_BINARY: sets all pixel values above a certain threshold to a maximum value (255) and all others to a minimum value (0). 
-    cv2.THRESH_OTSU:  calculates an "optimal" threshold value based on the histogram of the image. 
-    '''
-    _, thresholded_frame = cv2.threshold(erode, 12, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
-
-    # Calculate the mean intensity value within the region of interest (ROI)
-    calcium_intensity = np.mean(thresholded_frame)
-
-    return calcium_intensity
 
 
 # Proper segmentation of ROI
@@ -247,13 +196,4 @@ plt.xticks(concentrations)
 plt.savefig(title + ' heart rate.png')
 plt.close()
 
-
-end_time = time.time()
-execution_time = end_time - start_time
-
-print(f"Execution time: {execution_time} seconds")
-
-
-'''
-'''
 
