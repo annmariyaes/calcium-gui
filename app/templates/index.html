@@ -1,0 +1,74 @@
+<!doctype html>
+<html>
+  <head>
+    <title>File Upload</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+      }
+
+      h1 {
+        text-align: center;
+      }
+
+      form {
+        max-width: 600px;
+        margin: auto;
+        padding: 20px;
+        background-color: #f9f9f9;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      input[type="file"], input[type="text"] {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        box-sizing: border-box;
+      }
+
+      input[type="submit"] {
+        background-color: #4CAF50;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+
+      input[type="submit"]:hover {
+        background-color: #45a049;
+      }
+
+      img {
+        max-width: 100%;
+        display: block;
+        margin: auto;
+        margin-top: 20px;
+      }
+    </style>
+
+  </head>
+  <body>
+    <h1>Calcium Imaging Data Analysis</h1>
+    <form action="/upload" method="post" enctype="multipart/form-data">
+      <label for="file1">Upload File 1:</label>
+      <input type="file" name="file1" accept=".zip"><br>
+      <label for="file2">Upload File 2:</label>
+      <input type="file" name="file2" accept=".zip"><br>
+      <label for="file3">Upload File 3:</label>
+      <input type="file" name="file3" accept=".zip"><br>
+
+      <label for="textbox">Concentrations</label>
+      <input type="text" name="textbox" placeholder="(comma-separated)"><br>
+
+      <input type="submit" value="Create plot">
+
+      {% if plot_data %}
+      <img src="data:image/png;base64,{{ plot_data }}" alt="Plot">
+      {% endif %}
+    </form>
+  </body>
+</html>

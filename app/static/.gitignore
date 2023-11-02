@@ -1,0 +1,5 @@
+*.tif
+*.zip
+*.xml
+
+# ignore above type of files
