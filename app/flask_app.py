@@ -146,7 +146,7 @@ def process_organoids(*concentrations):
 
 
 def generate_plot(organoids, concentrations):
-    print(len(organoids))
+    # print(len(organoids))
 
     heart_rates = []
     time_intervals = np.linspace(0, 10, 450)
@@ -155,20 +155,20 @@ def generate_plot(organoids, concentrations):
     for i, organoid in enumerate(organoids):
 
         mean_pixel_intensity, heart_rate = zip(*process_organoids(*organoid))
-        print(len(mean_pixel_intensity))
+        # print(len(mean_pixel_intensity))
         # Plot the mean intensities
         '''
         fig, axes = plt.subplots(2, 2, figsize=(10, 8))
 
         for j, intensity in enumerate(mean_pixel_intensity):
             axes[j // 2, j % 2].plot(time_intervals, intensity, color=colors[j], markersize=1)
-            axes[j // 2, j % 2].set_title(organoid[j].split('\\')[-1])
+            axes[j // 2, j % 2].set_title(organoid[j].split('/')[-1])
             axes[j // 2, j % 2].set_xlabel('Time (sec)')
             axes[j // 2, j % 2].set_ylabel('Mean Intensities (pixels)')
 
         # Adjust layout to prevent overlap
         plt.tight_layout()
-        plt.savefig(organoid[0].split('/')[-3] + ' intensity ' + str(i + 1))
+        plt.savefig('static/uploads/' + organoid[0].split('/')[-3] + ' intensity ' + str(i + 1))
         plt.close()
         '''
 
@@ -236,10 +236,9 @@ def upload_files():
         else:
             return "Invalid file format. Please upload a .zip file."
 
-    print(all_folders)
+    # print(all_folders)
     textbox_value = request.form['textbox']
     text = [int(x.strip()) for x in ''.join(textbox_value).split(',')]
-    print(text)
 
     plot = generate_plot(all_folders, text)
     return render_template('index.html', plot_data=plot)

@@ -68,7 +68,9 @@
 
       {% if plot_data %}
       <img src="data:image/png;base64,{{ plot_data }}" alt="Plot">
+      <input type="hidden" name="plot_data" value="{{ plot_data }}">
       {% endif %}
+
     </form>
   </body>
 </html>
