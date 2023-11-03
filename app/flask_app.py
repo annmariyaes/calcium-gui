@@ -145,19 +145,18 @@ def process_organoids(*concentrations):
     return list(results)
 
 
-def generate_plot(organoids, concentrations):
-    # print(len(organoids))
+def generate_heartrate_plot(organoids, concentrations):
 
     heart_rates = []
+    intensity_plot_paths = []
     time_intervals = np.linspace(0, 10, 450)
     colors = ['green', 'purple', 'orange', 'red']  # Define colors for each organoid
+    title = organoids[0][0].split('/')[-2].split()[0]
 
     for i, organoid in enumerate(organoids):
-
         mean_pixel_intensity, heart_rate = zip(*process_organoids(*organoid))
-        # print(len(mean_pixel_intensity))
-        # Plot the mean intensities
-        '''
+
+        # pixel intensity plot
         fig, axes = plt.subplots(2, 2, figsize=(10, 8))
 
         for j, intensity in enumerate(mean_pixel_intensity):
@@ -168,9 +167,10 @@ def generate_plot(organoids, concentrations):
 
         # Adjust layout to prevent overlap
         plt.tight_layout()
-        plt.savefig('static/uploads/' + organoid[0].split('/')[-3] + ' intensity ' + str(i + 1))
+        plot_filename1 = 'static/uploads/' + title + ' intensity ' + str(i + 1) + '.png'
+        plt.savefig(plot_filename1)
         plt.close()
-        '''
+        intensity_plot_paths.append(plot_filename1)
 
         heart_rates.append(heart_rate)
 
@@ -179,19 +179,18 @@ def generate_plot(organoids, concentrations):
         plt.scatter(concentrations, heart_rate, marker='o', label=f'Organoid {r + 1}')
     plt.xlabel('Concentration (nM)')
     plt.ylabel('Heart Rate (Hz)')
-    title = organoids[0][0].split('/')[-2].split()[0]
     plt.title(title)
     plt.legend()
     plt.xticks(concentrations)
-    plot_filename = 'static/uploads/' + title + ' heart rate.png'
-    plt.savefig(plot_filename)
+    plot_filename2 = 'static/uploads/' + title + ' heart rate.png'
+    plt.savefig(plot_filename2)
     plt.close()
 
     # Encode the image file to base64
-    with open(plot_filename, "rb") as image_file:
-        encoded_plot = base64.b64encode(image_file.read()).decode('utf-8')
+    with open(plot_filename2, "rb") as image_file:
+        encoded_heartrate_plot = base64.b64encode(image_file.read()).decode('utf-8')
 
-    return encoded_plot
+    return intensity_plot_paths, encoded_heartrate_plot
 
 
 app = Flask(__name__)
@@ -231,17 +230,29 @@ def upload_files():
                 folder = os.path.join(extracted_folder_path, fold)
                 folder = folder.replace('\\', '/')
                 folders.append(folder)
+
             all_folders.append(folders)
 
         else:
             return "Invalid file format. Please upload a .zip file."
 
-    # print(all_folders)
-    textbox_value = request.form['textbox']
-    text = [int(x.strip()) for x in ''.join(textbox_value).split(',')]
+    f1 = request.files['file1'].filename
+    f2 = request.files['file2'].filename
+    f3 = request.files['file3'].filename
+    print(f1, f2, f3)  # not working!!
 
-    plot = generate_plot(all_folders, text)
-    return render_template('index.html', plot_data=plot)
+    # textbox to enter concentration values
+    textbox_value = request.form['textbox']
+    text = [str(x.strip()) for x in ''.join(textbox_value).split(',')]
+
+    # pixel intensity plot, heart rate vs concentration plot
+    plot1, plot2 = generate_heartrate_plot(all_folders, text)
+
+    return render_template('index.html',
+                           intensity_plots=plot1,
+                           plot_heartrate=plot2,
+                           zip1=f1, zip2=f2, zip3=f3,
+                           concentrations=textbox_value)
 
 
 if __name__ == '__main__':

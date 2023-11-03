@@ -6,6 +6,7 @@ from scipy.fft import fft, fftfreq
 from concurrent.futures import ThreadPoolExecutor
 
 
+# class Organoid():
 def frames(folder_path):
     """
     :param folder_path: path of each frame
@@ -139,72 +140,80 @@ def process_organoids(*concentrations):
     return list(results)
 
 
+def generate_plot(organoids, concentrations):
+
+    heart_rates = []
+    time_intervals = np.linspace(0, 10, 450)
+    colors = ['green', 'purple', 'orange', 'red']  # Define colors for each organoid
+
+    for i, organoid in enumerate(organoids):
+
+        mean_pixel_intensity, heart_rate = zip(*process_organoids(*organoid))
+
+        # Plot the mean intensities
+        fig, axes = plt.subplots(2, 2, figsize=(10, 8))
+
+        for j, intensity in enumerate(mean_pixel_intensity):
+            # print(organoid[j].split('/')[-2])
+            axes[j // 2, j % 2].plot(time_intervals, intensity, color=colors[j], markersize=1)
+            axes[j // 2, j % 2].set_title(organoid[j].split('/')[-2])
+            axes[j // 2, j % 2].set_xlabel('Time (sec)')
+            axes[j // 2, j % 2].set_ylabel('Mean Intensities (pixels)')
+
+        # Adjust layout to prevent overlap
+        plt.tight_layout()
+        plt.savefig('results/' + organoid[0].split('/')[-3] + ' intensity ' + str(i + 1))
+        plt.close()
+
+        heart_rates.append(heart_rate)
+
+    # plot of heart rate vs concentration
+    for r, heart_rate in enumerate(heart_rates):
+        plt.scatter(concentrations, heart_rate, marker='o', label=f'Organoid {r + 1}')
+    plt.xlabel('Concentration (nM)')
+    plt.ylabel('Heart Rate (Hz)')
+    title = organoids[0][0].split('/')[-3]
+    plt.title(title)
+    plt.legend()
+    plt.xticks(concentrations)
+    plt.savefig('results/' + title + ' heart rate.png')
+    plt.close()
+
+
 # Isoprenaline
 # Nifedifine
 # E4031
 # BPA
-'''
-concentrations = ['0', '100', '500', '1000', '10000']
-organoids = [
-    ('D:/ann/Experiment/BPA/Normal 1/', 'D:/ann/Experiment/BPA/1 uM BPA 1/', 'D:/ann/Experiment/BPA/10 uM BPA 1/'),
-    ('D:/ann/Experiment/BPA/Normal 2/', 'D:/ann/Experiment/BPA/1 uM BPA 2/', 'D:/ann/Experiment/BPA/10 uM BPA 2/')
-]
 
-organoids = [
-    ('D:/ann/Experiment/E4031/Normal 1/', 'D:/ann/Experiment/E4031/100 nM E4031 1/', 'D:/ann/Experiment/E4031/500 nM E4031 1/', 'D:/ann/Experiment/E4031/1 uM E4031 1/'),
-    ('D:/ann/Experiment/E4031/Normal 2/', 'D:/ann/Experiment/E4031/100 nM E4031 2/', 'D:/ann/Experiment/E4031/500 nM E4031 2/', 'D:/ann/Experiment/E4031/1 uM E4031 2/'),
-    ('D:/ann/Experiment/E4031/Normal 3/', 'D:/ann/Experiment/E4031/100 nM E4031 3/', 'D:/ann/Experiment/E4031/500 nM E4031 3/', 'D:/ann/Experiment/E4031/1 uM E4031 3/')
-]
-
-organoids = [
-    ('D:/ann/Experiment/Isoprenaline/Normal 1/', 'D:/ann/Experiment/Isoprenaline/100 nM Isoprenaline 1/', 'D:/ann/Experiment/Isoprenaline/500 nM Isoprenaline 1/', 'D:/ann/Experiment/Isoprenaline/1 uM Isoprenaline 1/'),
-    ('D:/ann/Experiment/Isoprenaline/Normal 2/', 'D:/ann/Experiment/Isoprenaline/100 nM Isoprenaline 2/', 'D:/ann/Experiment/Isoprenaline/500 nM Isoprenaline 2/', 'D:/ann/Experiment/Isoprenaline/1 uM Isoprenaline 2/'),
-    ('D:/ann/Experiment/Isoprenaline/Normal 3/', 'D:/ann/Experiment/Isoprenaline/100 nM Isoprenaline 3/', 'D:/ann/Experiment/Isoprenaline/500 nM Isoprenaline 3/', 'D:/ann/Experiment/Isoprenaline/1 uM Isoprenaline 3/')
-]
-'''
 concentrations = ['0', '100', '1000', '10000']
 organoids = [
     ('D:/ann/Experiment/Nifedifine/Normal 1/', 'D:/ann/Experiment/Nifedifine/100 nM Nifedifine 1/', 'D:/ann/Experiment/Nifedifine/1 uM Nifedifine 1/', 'D:/ann/Experiment/Nifedifine/10 uM Nifedifine 1/'),
     ('D:/ann/Experiment/Nifedifine/Normal 2/', 'D:/ann/Experiment/Nifedifine/100 nM Nifedifine 2/', 'D:/ann/Experiment/Nifedifine/1 uM Nifedifine 2/', 'D:/ann/Experiment/Nifedifine/10 uM Nifedifine 2/'),
     ('D:/ann/Experiment/Nifedifine/Normal 3/', 'D:/ann/Experiment/Nifedifine/100 nM Nifedifine 3/', 'D:/ann/Experiment/Nifedifine/1 uM Nifedifine 3/', 'D:/ann/Experiment/Nifedifine/10 uM Nifedifine 3/')
     ]
+generate_plot(organoids, concentrations)
 
+'''
+concentrations = ['0', '1000', '10000']
+organoids = [
+    ('D:/ann/Experiment/BPA/Normal 1/', 'D:/ann/Experiment/BPA/1 uM BPA 1/', 'D:/ann/Experiment/BPA/10 uM BPA 1/'),
+    ('D:/ann/Experiment/BPA/Normal 2/', 'D:/ann/Experiment/BPA/1 uM BPA 2/', 'D:/ann/Experiment/BPA/10 uM BPA 2/')
+]
 
-heart_rates = []
-time_intervals = np.linspace(0, 10, 450)
-colors = ['green', 'purple', 'orange', 'red']  # Define colors for each organoid
+concentrations = ['0', '100', '500', '1000']
+organoids = [
+    ('D:/ann/Experiment/E4031/Normal 1/', 'D:/ann/Experiment/E4031/100 nM E4031 1/', 'D:/ann/Experiment/E4031/500 nM E4031 1/', 'D:/ann/Experiment/E4031/1 uM E4031 1/'),
+    ('D:/ann/Experiment/E4031/Normal 2/', 'D:/ann/Experiment/E4031/100 nM E4031 2/', 'D:/ann/Experiment/E4031/500 nM E4031 2/', 'D:/ann/Experiment/E4031/1 uM E4031 2/'),
+    ('D:/ann/Experiment/E4031/Normal 3/', 'D:/ann/Experiment/E4031/100 nM E4031 3/', 'D:/ann/Experiment/E4031/500 nM E4031 3/', 'D:/ann/Experiment/E4031/1 uM E4031 3/')
+]
 
-for i, organoid in enumerate(organoids):
+concentrations = ['0', '100', '500', '1000']
+organoids = [
+    ('D:/ann/Experiment/Isoprenaline/Normal 1/', 'D:/ann/Experiment/Isoprenaline/100 nM Isoprenaline 1/', 'D:/ann/Experiment/Isoprenaline/500 nM Isoprenaline 1/', 'D:/ann/Experiment/Isoprenaline/1 uM Isoprenaline 1/'),
+    ('D:/ann/Experiment/Isoprenaline/Normal 2/', 'D:/ann/Experiment/Isoprenaline/100 nM Isoprenaline 2/', 'D:/ann/Experiment/Isoprenaline/500 nM Isoprenaline 2/', 'D:/ann/Experiment/Isoprenaline/1 uM Isoprenaline 2/'),
+    ('D:/ann/Experiment/Isoprenaline/Normal 3/', 'D:/ann/Experiment/Isoprenaline/100 nM Isoprenaline 3/', 'D:/ann/Experiment/Isoprenaline/500 nM Isoprenaline 3/', 'D:/ann/Experiment/Isoprenaline/1 uM Isoprenaline 3/')
+]
+'''
 
-    mean_pixel_intensity, heart_rate = zip(*process_organoids(*organoid))
-
-    # Plot the mean intensities
-    fig, axes = plt.subplots(2, 2, figsize=(10, 8))
-
-    for j, intensity in enumerate(mean_pixel_intensity):
-        # print(organoid[j].split('/')[-2])
-        axes[j // 2, j % 2].plot(time_intervals, intensity, color=colors[j], markersize=1)
-        axes[j // 2, j % 2].set_title(organoid[j].split('/')[-2])
-        axes[j // 2, j % 2].set_xlabel('Time (sec)')
-        axes[j // 2, j % 2].set_ylabel('Mean Intensities (pixels)')
-
-    # Adjust layout to prevent overlap
-    plt.tight_layout()
-    plt.savefig(organoid[0].split('/')[-3] + ' intensity ' + str(i + 1))
-    plt.close()
-
-    heart_rates.append(heart_rate)
-
-# plot of heart rate vs concentration
-for r, heart_rate in enumerate(heart_rates):
-    plt.scatter(concentrations, heart_rate, marker='o', label=f'Organoid {r + 1}')
-plt.xlabel('Concentration (nM)')
-plt.ylabel('Heart Rate (Hz)')
-title = organoids[0][0].split('/')[-3]
-plt.title(title)
-plt.legend()
-plt.xticks(concentrations)
-plt.savefig(title + ' heart rate.png')
-plt.close()
 
 
