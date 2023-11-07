@@ -167,10 +167,10 @@ def generate_heartrate_plot(organoids, concentrations):
 
         # Adjust layout to prevent overlap
         plt.tight_layout()
-        plot_filename1 = 'static/uploads/' + title + ' intensity ' + str(i + 1) + '.png'
-        plt.savefig(plot_filename1)
+        plot_filename = 'static/uploads/' + title + ' intensity ' + str(i + 1) + '.png'
+        plt.savefig(plot_filename)
         plt.close()
-        intensity_plot_paths.append(plot_filename1)
+        intensity_plot_paths.append(plot_filename)
 
         heart_rates.append(heart_rate)
 
@@ -182,15 +182,11 @@ def generate_heartrate_plot(organoids, concentrations):
     plt.title(title)
     plt.legend()
     plt.xticks(concentrations)
-    plot_filename2 = 'static/uploads/' + title + ' heart rate.png'
-    plt.savefig(plot_filename2)
+    heartrate_vs_concentration = 'static/uploads/' + title + ' heart rate.png'
+    plt.savefig(heartrate_vs_concentration)
     plt.close()
 
-    # Encode the image file to base64
-    with open(plot_filename2, "rb") as image_file:
-        encoded_heartrate_plot = base64.b64encode(image_file.read()).decode('utf-8')
-
-    return intensity_plot_paths, encoded_heartrate_plot
+    return intensity_plot_paths, heartrate_vs_concentration
 
 
 app = Flask(__name__)
@@ -205,36 +201,37 @@ def index():
 
 @app.route('/upload', methods=['POST'])
 def upload_files():
-    uploaded_files = [request.files['file1'], request.files['file2'], request.files['file3']]
+
     all_folders = []
+    for i in range(1, 4):
+        file = request.files.get(f'file{i}')
+        if file:
+            if file.filename.endswith('.zip'):
+                # Create uploads directory if it doesn't exist
+                if not os.path.exists(UPLOAD_FOLDER):
+                    os.makedirs(UPLOAD_FOLDER)
 
-    for file in uploaded_files:
-        if file and file.filename.endswith('.zip'):
-            # Create uploads directory if it doesn't exist
-            if not os.path.exists(UPLOAD_FOLDER):
-                os.makedirs(UPLOAD_FOLDER)
+                # Save the uploaded file
+                file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+                file.save(file_path)
 
-            # Save the uploaded file
-            file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
-            file.save(file_path)
+                # Extract the contents of the zip file
+                with zipfile.ZipFile(file_path, 'r') as zip_ref:
+                    zip_ref.extractall(os.path.join(app.config['UPLOAD_FOLDER'], file.filename[:-4]))
 
-            # Extract the contents of the zip file
-            with zipfile.ZipFile(file_path, 'r') as zip_ref:
-                zip_ref.extractall(os.path.join(app.config['UPLOAD_FOLDER'], file.filename[:-4]))
+                extracted_folder_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename[:-4])
+                # print(extracted_folder_path)
 
-            extracted_folder_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename[:-4])
-            # print(extracted_folder_path)
+                folders = []
+                for fold in os.listdir(extracted_folder_path):
+                    folder = os.path.join(extracted_folder_path, fold)
+                    folder = folder.replace('\\', '/')
+                    folders.append(folder)
 
-            folders = []
-            for fold in os.listdir(extracted_folder_path):
-                folder = os.path.join(extracted_folder_path, fold)
-                folder = folder.replace('\\', '/')
-                folders.append(folder)
+                all_folders.append(folders)
 
-            all_folders.append(folders)
-
-        else:
-            return "Invalid file format. Please upload a .zip file."
+            else:
+                return "Invalid file format. Please upload a .zip file."
 
     f1 = request.files['file1'].filename
     f2 = request.files['file2'].filename

@@ -1,103 +1,107 @@
 <!doctype html>
 <html>
-  <head>
-    <title>heart rate</title>
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-      }
+    <head>
+        <title>heart rate</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+            }
 
-      h1 {
-        text-align: center;
-      }
+            h1 {
+                text-align: center;
+            }
 
-      form {
-        max-width: 10000px;
-        margin: auto;
-        padding: 20px;
-        background-color: #f9f9f9;
-        border-radius: 10px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      }
+            form {
+                width: 90%;
+                margin: auto;
+                padding: 20px;
+                background-color: #f9f9f9;
+                border-radius: 10px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+            }
 
-      input[type="file"]{
-        width: 50%;
-        padding: 10px;
-        margin-bottom: 10px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        box-sizing: border-box;
-      }
+            input[type="file"]{
+                width: 50%;
+                padding: 10px;
+                margin-bottom: 10px;
+                border: 1px solid #ccc;
+                border-radius: 5px;
+                box-sizing: border-box;
+            }
 
-      input[type="text"] {
-        width: 30%;
-        padding: 10px;
-        margin-bottom: 10px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        box-sizing: border-box;
-      }
+            input[type="text"] {
+                width: 30%;
+                padding: 10px;
+                margin-bottom: 10px;
+                border: 1px solid #ccc;
+                border-radius: 5px;
+                box-sizing: border-box;
+            }
 
-      input[type="submit"] {
-        background-color: #4CAF50;
-        color: white;
-        padding: 10px 20px;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-      }
+            input[type="submit"] {
+                background-color: #4CAF50;
+                color: white;
+                padding: 10px 20px;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+            }
 
-      input[type="submit"]:hover {
-        background-color: #45a049;
-      }
+            input[type="submit"]:hover {
+                background-color: #45a049;
+            }
 
-      img {
-        max-width: 100%;
-        display: block;
-        margin: auto;
-        margin-top: 20px;
-      }
-    </style>
+            img {
+                max-width: 100%;
+                display: block;
+                margin: auto;
+                margin-top: 20px;
+            }
+        </style>
 
-  </head>
-  <body>
-    <h1>Organoid Imaging Data Analysis</h1>
-    <form action="/upload" method="post" enctype="multipart/form-data">
+    </head>
 
-        <label for="file1">Upload Organoid zip file 1:</label>
-        <input type="file" name="file1" accept=".zip" value="{{ zip1 }}"><br>
+    <body>
 
-        <label for="file2">Upload Organoid zip file 2:</label>
-        <input type="file" name="file2" accept=".zip" value="{{ zip2 }}"><br>
+        <h1>Organoid Imaging Data Analysis</h1>
 
-        <label for="file3">Upload Organoid zip file 3:</label>
-        <input type="file" name="file3" accept=".zip" value="{{ zip3 }}"><br><br>
+        <form action="/upload" method="post" enctype="multipart/form-data">
 
+            <label for="file1">Upload Organoid zip file 1:</label>
+            <input type="file" name="file1" accept=".zip" value="{{ zip1 }}"><br>
 
-      <label for="textbox">Concentrations: </label>
-      <input type="text" name="textbox" placeholder="(eg: 0, 100, 500, 1000)" value="{{ concentrations }}"><br>
+            <label for="file2">Upload Organoid zip file 2:</label>
+            <input type="file" name="file2" accept=".zip" value="{{ zip1 }}"><br>
 
-      <input type="submit" value="Create heart rate plots">
+            <label for="file3">Upload Organoid zip file 3:</label>
+            <input type="file" name="file3" accept=".zip" value="{{ zip1 }}"><br><br>
 
 
-      <!-- HTML template inheritance -->
-      {% if intensity_plots %}
-          <div style="display: flex;">
-              {% for intensity_plot in intensity_plots %}
-                  <div style="margin-right: 10px;">
-                      <img src="{{ intensity_plot }}" alt="Intensity Plot">
-                  </div>
-              {% endfor %}
-          </div>
-      {% endif %}
+            <label for="textbox">Concentrations: </label>
+            <input type="text" name="textbox" placeholder="(eg: 0, 100, 500, 1000)" value="{{ concentrations }}"><br>
 
 
-      {% if plot_heartrate %}
-          <img src="data:image/png;base64,{{ plot_heartrate }}" alt="Plot">
-          <input type="hidden" name="plot_heartrate" value="{{ plot_heartrate }}">
-      {% endif %}
+            <input type="submit" value="Create heart rate plots" id="submit">
 
-    </form>
 
-  </body>
+            <!-- HTML template inheritance (following content will appear after button is pressed) -->
+
+            {% if intensity_plots %}
+                <div style="display: flex;">
+                    {% for intensity_plot in intensity_plots %}
+                          <div style="margin-right: 10px;">
+                              <img src="{{ intensity_plot }}" alt="Intensity Plot">
+                          </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+
+            {% if plot_heartrate %}
+                <img src="{{ plot_heartrate }}" alt="Plot">
+            {% endif %}
+
+        </form>
+
+    </body>
 </html>
