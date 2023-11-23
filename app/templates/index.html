@@ -88,15 +88,10 @@
             <label for="file3">Upload Organoid zip file 3:</label>
             <input type="file" name="file3" accept=".zip" value="{{ zip1 }}"><br><br>
 
-
-            <label for="textbox">Concentrations: </label>
-            <input type="text" name="textbox" placeholder="(eg: 0, 100, 500, 1000)" value="{{ concentrations }}"><br><br><br>
-
-
-            <input type="submit" value="Create heart rate plots" id="submit">
-
-
-            <!-- HTML template inheritance (following content will appear after button is pressed) -->
+            <div>
+                <input type="submit" name="action" value="Create mean intensity plots" id="submit-intensity" onclick="submitForm('Create mean intensity plots')">
+            </div>
+            <br><br><br>
 
             {% if intensity_plots %}
                 <div style="display: flex;">
@@ -107,16 +102,32 @@
                     {% endfor %}
                 </div>
             {% endif %}
+            <br><br><br>
 
+
+            <label for="textbox">Concentrations: </label>
+            <input type="text" name="textbox" placeholder="(eg: 0, 100, 500, 1000)" value="{{ concentrations }}"><br><br>
+
+            <div>
+            <input type="submit" name="action" value="Create heart rate vs concentration plot" id="submit-rate-vs-con" onclick="submitForm('Create heart rate vs concentration plot')">
+            </div>
 
             {% if plot_heartrate %}
                 <img src="{{ plot_heartrate }}" alt="Plot">
             {% endif %}
-
-
-            <script src="feature.js"> </script>
+            <br><br><br>
 
         </form>
+
+        <script>
+            function clickButton1() {
+            document.getElementById("submit-intensity").submit();
+            }
+
+            function clickButton2() {
+                document.getElementById("submit-rate-vs-con").submit();
+            }
+        </script>
 
     </body>
 </html>

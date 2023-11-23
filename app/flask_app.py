@@ -1,13 +1,11 @@
 import os
 import cv2
-import base64
 import zipfile
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.fft import fft, fftfreq
 from concurrent.futures import ThreadPoolExecutor
-from flask import Flask, render_template, request, redirect, url_for
-# Set Matplotlib backend to Agg
+from flask import Flask, render_template, request, session
 import matplotlib
 matplotlib.use('Agg')
 
@@ -145,9 +143,8 @@ def process_organoids(*concentrations):
     return list(results)
 
 
-def generate_heartrate_plot(organoids, concentrations):
+def generate_intensity_plot(organoids):
 
-    heart_rates = []
     intensity_plot_paths = []
     time_intervals = np.linspace(0, 10, 450)
     colors = ['green', 'purple', 'orange', 'red']  # Define colors for each organoid
@@ -169,8 +166,21 @@ def generate_heartrate_plot(organoids, concentrations):
         plt.tight_layout()
         plot_filename = 'static/uploads/' + title + ' intensity ' + str(i + 1) + '.png'
         plt.savefig(plot_filename)
+        print(plot_filename)
         plt.close()
         intensity_plot_paths.append(plot_filename)
+
+    return intensity_plot_paths
+
+
+def generate_heartrate_plot(organoids, concentrations):
+
+    print(organoids)
+    heart_rates = []
+    title = organoids[0][0].split('/')[-2].split()[0]
+
+    for i, organoid in enumerate(organoids):
+        mean_pixel_intensity, heart_rate = zip(*process_organoids(*organoid))
 
         heart_rates.append(heart_rate)
 
@@ -186,12 +196,13 @@ def generate_heartrate_plot(organoids, concentrations):
     plt.savefig(heartrate_vs_concentration)
     plt.close()
 
-    return intensity_plot_paths, heartrate_vs_concentration
+    return heartrate_vs_concentration
 
 
 app = Flask(__name__)
 UPLOAD_FOLDER = 'static/uploads/'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.secret_key = 'your_secret_key_here'
 
 
 @app.route('/')
@@ -201,8 +212,10 @@ def index():
 
 @app.route('/upload', methods=['POST'])
 def upload_files():
+    plot1, plot2 = None, None
 
-    all_folders = []
+    all_folders = session.get('all_folders', [])
+
     for i in range(1, 4):
         file = request.files.get(f'file{i}')
         if file:
@@ -243,7 +256,20 @@ def upload_files():
     text = [str(x.strip()) for x in ''.join(textbox_value).split(',')]
 
     # pixel intensity plot, heart rate vs concentration plot
-    plot1, plot2 = generate_heartrate_plot(all_folders, text)
+
+    print(request.form['action'])
+    session['all_folders'] = all_folders
+
+    if request.form['action'] == "Create mean intensity plots":
+        # Code to handle intensity plot button click
+        plot1 = generate_intensity_plot(all_folders)
+        print(plot1)
+
+    elif request.form['action'] == "Create heart rate vs concentration plot":
+        all_folders = session.get('all_folders', [])
+        print(all_folders)
+        # Code to handle heart rate vs concentration plot button click
+        plot2 = generate_heartrate_plot(all_folders, text)
 
     return render_template('index.html',
                            intensity_plots=plot1,
