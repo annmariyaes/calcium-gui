@@ -1,4 +1,2 @@
 # ignore above type of files
-*.csv
-*.jpg
-*.png
+*.tif

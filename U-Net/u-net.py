@@ -4,10 +4,12 @@ import matplotlib.pyplot as plt
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
-import tensorflow_datasets as tfds
 
 
-dataset, info = tfds.load('oxford_iiit_pet:3.*.*', with_info=True)
+"""
+Dataset images along with  corresponding segmentation masks (ground truth labels) 
+indicating the areas of interest (e.g., boundaries, objects, etc.).
+"""
 
 # Data processing
 
