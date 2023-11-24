@@ -4,7 +4,7 @@ import shutil
 
 # for U-Net dataset preparation
 # Total 3625 images
-# train=1088 (70%), test=544 (15%), test=544 (15%)
+# train=1088 (70%), valid=544 (15%), test=544 (15%)
 
 
 def randomly_pick_images(source_folder, destination_folder, n):
@@ -34,6 +34,6 @@ def randomly_pick_images(source_folder, destination_folder, n):
 source_directory = 'D:/ann/Experiment/dataset/'
 destination_directory = 'D:/ann/Experiment/dataset/train/'
 
-# train=1088 (70%), test=544 (15%), test=544 (15%)
+# train=1088 (70%), valid=544 (15%), test=544 (15%)
 number_of_images_to_pick = 0
 randomly_pick_images(source_directory, destination_directory, number_of_images_to_pick)
