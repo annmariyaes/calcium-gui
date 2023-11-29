@@ -3,7 +3,9 @@ import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt
 
+import joblib
 import tensorflow as tf
+import tensorflow.keras.backend as K
 from tensorflow import keras
 from tensorflow.keras import layers
 
@@ -66,7 +68,7 @@ plt.show()
 
 def double_conv_block(input_image, n_filters):
 
-    # Conv 3x3, ReLU
+    # Convolution with 3x3 filter followed by ReLU activation
     conv_relu_one = layers.Conv2D(n_filters, 3, padding="same", activation="relu", kernel_initializer="he_normal")(input_image)
     conv_relu_two = layers.Conv2D(n_filters, 3, padding="same", activation="relu", kernel_initializer="he_normal")(conv_relu_one)
 
@@ -81,6 +83,7 @@ def down_sample(input_image, n_filters):
     """
 
     conv_relu_two = double_conv_block(input_image, n_filters)
+    # Max Pooling with 2x2 filter
     max_pool = layers.MaxPool2D(2)(conv_relu_two)
     max_pool = layers.Dropout(0.3)(max_pool)
 
@@ -95,6 +98,7 @@ def up_sample(input_image, conv_features, n_filters):
     After concatenation, there are two 3x3 convolutions with ReLU activation functions to further process the combined features.
     """
     segmentation_map = layers.Conv2DTranspose(n_filters, 3, 2, padding="same")(input_image)
+    # Copy and crop the skip features
     segmentation_map = layers.concatenate([segmentation_map, conv_features])
     segmentation_map = layers.Dropout(0.3)(segmentation_map)
     segmentation_map = double_conv_block(segmentation_map, n_filters)
@@ -107,7 +111,7 @@ def build_unet_model():
     # inputs
     inputs = layers.Input(shape=(128, 128, 3))
 
-    # encoder: contracting path - down sample
+    # encoder: Contracting path - down sample
     conv_relu_two1, max_pool1 = down_sample(inputs, 64)
     conv_relu_two2, max_pool2 = down_sample(max_pool1, 128)
     conv_relu_two3, max_pool3 = down_sample(max_pool2, 256)
@@ -116,7 +120,7 @@ def build_unet_model():
     # 5 - bottleneck
     bottleneck = double_conv_block(max_pool4, 1024)
 
-    # decoder: expanding path - up sample
+    # decoder: Expanding path - up sample
     up_conv1 = up_sample(bottleneck, conv_relu_two4, 512)
     up_conv2 = up_sample(up_conv1, conv_relu_two3, 256)
     up_conv3 = up_sample(up_conv2, conv_relu_two2, 128)
@@ -140,17 +144,38 @@ def build_unet_model():
 unet_model = build_unet_model()
 unet_model.summary()
 
-unet_model.compile(optimizer='adam', loss="categorical_crossentropy", metrics="accuracy")
-history = unet_model.fit(train_images, train_mask_images, epochs=10, batch_size=32, validation_data=(valid_images, valid_mask_images))
 
+def mean_iou(y_true, y_pred):
+    intersection = K.sum(K.abs(y_true * K.round(y_pred)))
+    union = K.sum(y_true) + K.sum(K.round(y_pred)) - intersection
+    iou = intersection / (union + K.epsilon())
+    return iou
+
+
+def dice_coefficient(y_true, y_pred):
+    numerator = 2 * K.sum(y_true * y_pred)
+    denominator = K.sum(y_true) + K.sum(y_pred)
+    dice = numerator / (denominator + K.epsilon())
+    return dice
+
+
+# number of pixels that are classified correctly in the generated segmentation mask
+def pixel_wise_accuracy(y_true, y_pred):
+    return K.mean(K.equal(K.round(y_true), K.round(y_pred)))
+
+
+unet_model.compile(optimizer='adam', loss="binary_crossentropy", metrics=[mean_iou, dice_coefficient, pixel_wise_accuracy])
+history = unet_model.fit(train_images, train_mask_images, epochs=5, batch_size=32, validation_data=(valid_images, valid_mask_images))
+
+joblib.dump(unet_model, 'trained_model.pkl')
 
 test_loss, test_accuracy = unet_model.evaluate(test_images, test_mask_images)
 print(f"Test Accuracy: {test_accuracy}")
 
 plt.figure(figsize=(12, 4))
 plt.subplot(1, 2, 1)
-plt.plot(history.history['accuracy'], label='Training Accuracy')
-plt.plot(history.history['val_accuracy'], label='Validation Accuracy')
+plt.plot(history.history['mean_iou'], label='Training Mean IoU')
+plt.plot(history.history['val_mean_iou'], label='Validation Mean IoU')
 plt.xlabel('Epochs')
 plt.ylabel('Accuracy')
 plt.legend()
@@ -165,3 +190,28 @@ plt.show()
 
 
 # Prediction
+sample_index = 0  # Change this index to visualize predictions on different test images
+plt.figure(figsize=(10, 5))
+
+# Original test image
+plt.subplot(1, 3, 1)
+plt.imshow(test_images[sample_index])
+plt.title('Original Image')
+plt.axis('off')
+
+# Ground truth mask
+plt.subplot(1, 3, 2)
+plt.imshow(test_mask_images[sample_index])
+plt.title('Ground Truth Mask')
+plt.axis('off')
+
+# Model's predicted mask
+predictions = unet_model.predict(test_images[sample_index][np.newaxis, ...])
+binary_mask = (predictions[0, :, :, 0] > 0.5).astype(np.uint8)  # Thresholding for a binary mask
+plt.subplot(1, 3, 3)
+plt.imshow(binary_mask, cmap='gray')  # Displaying as a grayscale image
+plt.title('Predicted Mask')
+plt.axis('off')
+
+plt.tight_layout()
+plt.show()
