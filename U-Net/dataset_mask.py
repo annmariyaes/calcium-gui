@@ -5,8 +5,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # for U-Net data preparation: mask
-source_folder = 'D:/ann/Experiment/dataset/train/'
-destination_folder = 'D:/ann/Experiment/dataset/train_mask/'
+source_folder = 'D:/ann/Experiment/Isoprenaline/Normal 3/'
+destination_folder = 'D:/ann/Experiment/test/'
 
 
 files = [f for f in os.listdir(source_folder) if f.endswith('.tif')]
