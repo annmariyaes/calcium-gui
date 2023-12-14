@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 def frames(folder_path):
     files = [f for f in os.listdir(folder_path) if f.endswith('.tif')]
-    files = files[:450]
+    files = files[:870]
 
     frames = []
     for file in files:
@@ -98,33 +98,38 @@ def surface_area(frame):
     return area_cm2
 
 
-time_intervals = np.linspace(0, 15, 450)
+time_intervals = np.linspace(0, 29, 870)
 
 # Baseline > 100 nM Isoprenaline > 500 nM Isoprenaline > 1 µM Isoprenaline.
 
 # Assuming you have a folder with only TIFF files
-normal = 'D:/ann/Experiment/E4031/Normal 1/'
-hundred_nM = 'D:/ann/Experiment/Isoprenaline/100 nM Isoprenaline 1/'
-five_hundred_nM = 'D:/ann/Experiment/Isoprenaline/500 nM Isoprenaline 1/'
-one_um = 'D:/ann/Experiment/Isoprenaline/1 um Isoprenaline 1/'
+normal = 'D:/ann/Experiment/Isoprenaline/Normal 1/'
+hundred_nM = 'D:/ann/Experiment/Isoprenaline/100 nM isoprenaline 1/'
+five_hundred_nM = 'D:/ann/Experiment/Isoprenaline/500 nM isoprenaline 1/'
+one_um = 'D:/ann/Experiment/Isoprenaline/1 um isoprenaline 1/'
+
 
 normal_area = [surface_area(frame) for frame in frames(normal)]
 hundred_nM_area = [surface_area(frame) for frame in frames(hundred_nM)]
 five_hundred_nM_area = [surface_area(frame) for frame in frames(five_hundred_nM)]
 one_um_area = [surface_area(frame) for frame in frames(one_um)]
 
+
 plt.plot(time_intervals, normal_area, color='green', marker='o', markersize=2, label='Normal')
 plt.plot(time_intervals, hundred_nM_area, color='purple', marker='o', markersize=2, label='100 nM Isoprenaline')
 plt.plot(time_intervals, five_hundred_nM_area, color='orange', marker='o', markersize=2, label='500 nM Isoprenaline')
-plt.plot(time_intervals, one_um_area, color='red', marker='o', markersize=2, label='1 um Isoprenaline')
+plt.plot(time_intervals, one_um_area, color='red', marker='o', markersize=2, label='1 uM Isoprenaline')
+
 plt.xlabel('Relative time (sec)')
 plt.ylabel('Surface area (sq cm)')
 
 # Isoprenaline increases the force of contraction of the heart muscle.
 plt.title('Effect of Isoprenaline on Cardiomyocyte surface area (Experiment 1)')
 plt.legend()
-plt.savefig('Isoprenaline area 1')
-plt.show()
+destination_folder = 'C:/Users/Annmariya.sebastian/PycharmProjects/calcium-gui/trial images'
+file_path = os.path.join(destination_folder, 'Isoprenaline area 1.png')
+plt.savefig(file_path)
+# plt.show()
 
 # Isoprenaline
 # E4031

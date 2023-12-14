@@ -4,7 +4,7 @@ import shutil
 
 # for U-Net dataset preparation
 # Total 3625 images
-# train=1088 (70%), valid=544 (15%), test=544 (15%)
+# train=2537 (70%), valid=544 (15%), test=544 (15%)
 
 
 def randomly_pick_images(source_folder, destination_folder, n):
@@ -31,9 +31,9 @@ def randomly_pick_images(source_folder, destination_folder, n):
         print(f"Image '{file_name}' copied to '{destination_folder}'")
 
 
-source_directory = 'D:/ann/Experiment/dataset/'
-destination_directory = 'D:/ann/Experiment/dataset/train/'
+source_directory = 'D:/ann/Experiment/Nifedifine/temp/'
+destination_directory = 'D:/ann/Experiment/dataset/new/'
 
-# train=1088 (70%), valid=544 (15%), test=544 (15%)
+# train=2537 (70%), valid=544 (15%), test=544 (15%)
 number_of_images_to_pick = 0
 randomly_pick_images(source_directory, destination_directory, number_of_images_to_pick)

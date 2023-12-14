@@ -17,7 +17,7 @@ def frames(folder_path):
     """
     # Assuming you have a folder with only TIFF files
     files = [f for f in os.listdir(folder_path) if f.endswith('.tif')]
-    files = files[100:550]  # 450 frames
+    files = files[100:400]  # 450 frames
 
     for file in files:
         image_path = os.path.join(folder_path, file)

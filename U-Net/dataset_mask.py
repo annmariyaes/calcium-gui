@@ -5,8 +5,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # for U-Net data preparation: mask
-source_folder = 'D:/ann/Experiment/Isoprenaline/Normal 3/'
-destination_folder = 'D:/ann/Experiment/test/'
+source_folder = 'D:/ann/Experiment/dataset/new/'
+destination_folder = 'D:/ann/Experiment/dataset/new mask/'
+if not os.path.exists(destination_folder):
+    os.makedirs(destination_folder)
 
 
 files = [f for f in os.listdir(source_folder) if f.endswith('.tif')]
@@ -102,6 +104,7 @@ for file_name in files:
             This factor depends on the resolution or dots per inch (DPI) of the image.
             '''
             area_cm2 = (actual_area / math.sqrt(dpi)) * math.sqrt((1 / 2.54))
+
             surface_area.append(area_cm2)
             # print('Area in square centimeters:', area_cm2)
 
@@ -115,80 +118,17 @@ for file_name in files:
             fluorescent_cal_trace = np.sum(image[pts[0], pts[1]])
             # print('Fluorescent calcium trace:', fluorescent_cal_trace)
 
-            # print(file_name.split('.')[0] + ' segmented' + '.tif')
+            # destination_file = destination_folder + file_name.split('.')[0] + ' segmented' + '.tif'
+            # cv2.imwrite(destination_file, segmented_frame)
 
-            if not os.path.exists(destination_folder):
-                os.makedirs(destination_folder)
+            # bad segmentation
 
-            destination_file = destination_folder + file_name.split('.')[0] + ' segmented' + '.tif'
-            cv2.imwrite(destination_file, segmented_frame)
-            # cv2.imshow('Segmentation', segmented_frame)
-            # cv2.waitKey(0)
-            # cv2.destroyAllWindows()
-
-
-'''
-            fig = plt.figure(figsize=(10, 7))
-
-            fig.add_subplot(3, 2, 1)
-            plt.imshow(cv2.cvtColor(blur_frame, cv2.COLOR_BGR2RGB))
-            plt.axis('off')
-            plt.title("Gaussian Blurring")
-
-            fig.add_subplot(3, 2, 2)
-            plt.imshow(cv2.cvtColor(clahe_frame, cv2.COLOR_BGR2RGB))
-            plt.axis('off')
-            plt.title("CLAHE")
-
-            fig.add_subplot(3, 2, 3)
-            plt.imshow(cv2.cvtColor(dilate_frame, cv2.COLOR_BGR2RGB))
-            plt.axis('off')
-            plt.title("Dilation")
-
-            fig.add_subplot(3, 2, 4)
-            plt.imshow(cv2.cvtColor(erode_frame, cv2.COLOR_BGR2RGB))
-            plt.axis('off')
-            plt.title("Erosion")
-
-            fig.add_subplot(3, 2, 5)
-            plt.imshow(cv2.cvtColor(threshold_frame, cv2.COLOR_BGR2RGB))
-            plt.axis('off')
-            plt.title("Thresholding")
-
-            fig.add_subplot(3, 2, 6)
-            plt.imshow(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
-            plt.axis('off')
-            plt.title("Segmented")
-
-    plt.show()
-'''
+            if area_cm2 >= 3000:
+                destination_file1 = destination_folder + file_name.split('.')[0] + ' segmented' + '.tif'
+                cv2.imwrite(destination_file1, segmented_frame)
+                print(area_cm2)
 
 
-'''
-cv2.imshow('Contours', image)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
-print(len(surface_area))
-
-
-fig, axs = plt.subplots(2, 2)
-fig.suptitle('Vertically stacked subplots')
-axs[0].plot(x, y)
-axs[1].plot(x, -y)
-'''
-
-
-'''
-normal = 'D:/ann/Experiment/E4031/Normal 1/'
-hundred_nM = 'D:/ann/Experiment/E4031/100 nM E4031 1/'
-five_hundred_nM = 'D:/ann/Experiment/E4031/500 nM E4031 1/'
-one_um = 'D:/ann/Experiment/E4031/1 um E4031 1/'
-
-normal = 'D:/ann/Experiment/Isoprenaline/Normal 1/'
-hundred_nM = 'D:/ann/Experiment/Isoprenaline/100 nM Isoprenaline 1/'
-five_hundred_nM = 'D:/ann/Experiment/Isoprenaline/500 nM Isoprenaline 1/'
-one_um = 'D:/ann/Experiment/Isoprenaline/1 um Isoprenaline 1/'
-'''
 
 
 
