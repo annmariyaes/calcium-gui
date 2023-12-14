@@ -40,7 +40,6 @@ def upload_files():
                     zip_ref.extractall(os.path.join(app.config['UPLOAD_FOLDER'], file.filename[:-4]))
 
                 extracted_folder_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename[:-4])
-                # print(extracted_folder_path)
 
                 folders = []
                 for fold in os.listdir(extracted_folder_path):
@@ -56,7 +55,7 @@ def upload_files():
     f1 = request.files['file1'].filename
     f2 = request.files['file2'].filename
     f3 = request.files['file3'].filename
-    print(f1, f2, f3)  # not working!!
+    # print(f1, f2, f3)  # not working!!
 
     # textbox to enter concentration values
     textbox_value = request.form['textbox']
@@ -64,8 +63,8 @@ def upload_files():
 
     # pixel intensity plot, heart rate vs concentration plot
 
-    print(request.form['action'])
     session['all_folders'] = all_folders
+    all_folders = session.get('all_folders', [])
 
     # Creating an instance of class
     s1 = segment.Segmentation(all_folders)
@@ -73,11 +72,10 @@ def upload_files():
     if request.form['action'] == "Create mean intensity plots":
         # Code to handle intensity plot button click
         plot1 = s1.generate_intensity_plot()
-        print(plot1)
 
     elif request.form['action'] == "Create heart rate vs concentration plot":
-        all_folders = session.get('all_folders', [])
-        print(all_folders)
+        # plot1 = s1.generate_intensity_plot()
+
         # Code to handle heart rate vs concentration plot button click
         plot2 = (s1.generate_heartrate_plot(text))
 

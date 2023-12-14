@@ -9,7 +9,7 @@ with that imaging data, intensity plot and heart rate vs concentration plots are
 
 OpenCV, Flask, NumPy, Scipy, Matplotlib.
 
-![img.png](flaskapp.png)
+![img.png](static/uploads/flaskapp.png)
 
 
 

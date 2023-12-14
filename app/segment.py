@@ -28,16 +28,15 @@ class Segmentation:
             fig, axes = plt.subplots(2, 2, figsize=(10, 8))
 
             for j, intensity in enumerate(mean_pixel_intensity):
-                axes[j // 2, j % 2].plot(time_intervals, intensity, color=colors[j], markersize=1)
-                axes[j // 2, j % 2].set_title(organoid[j].split('/')[-1])
-                axes[j // 2, j % 2].set_xlabel('Time (sec)')
-                axes[j // 2, j % 2].set_ylabel('Mean Intensities (pixels)')
+                axes[j//2, j%2].plot(time_intervals, intensity, color=colors[j], markersize=1)
+                axes[j//2, j%2].set_title(organoid[j].split('/')[-1])
+                axes[j//2, j%2].set_xlabel('Time (sec)')
+                axes[j//2, j%2].set_ylabel('Mean Intensities (pixels)')
 
             # Adjust layout to prevent overlap
             plt.tight_layout()
             plot_filename = 'static/uploads/' + title + ' intensity ' + str(i + 1) + '.png'
             plt.savefig(plot_filename)
-            print(plot_filename)
             plt.close()
             intensity_plot_paths.append(plot_filename)
 
@@ -47,13 +46,11 @@ class Segmentation:
 
     def generate_heartrate_plot(self, concentrations):
 
-        print(self.organoids)
         heart_rates = []
         title = self.organoids[0][0].split('/')[-2].split()[0]
 
         for i, organoid in enumerate(self.organoids):
             mean_pixel_intensity, heart_rate = zip(*self.process_organoids(*organoid))
-
             heart_rates.append(heart_rate)
 
         # plot of heart rate vs concentration
@@ -86,6 +83,7 @@ class Segmentation:
         # This effectively normalizes each element to be a value between 0 and 1.
         total_intensity = np.sum(pixel_intensity)
         normalized = [(concentration / total_intensity) * 100 for concentration in pixel_intensity]
+
         return normalized, self.calculate_heart_rate(normalized)
 
 
@@ -171,7 +169,6 @@ class Segmentation:
             area_pixels = cv2.contourArea(contour)
 
             if area_pixels > 10000:
-                # print(area_pixels)
 
                 # To draw all the contours in an image
                 cv2.drawContours(frame, [contour], -1, (0, 255, 255), 3)
