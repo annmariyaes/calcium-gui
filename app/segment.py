@@ -20,7 +20,8 @@ class Segmentation:
         for i, organoid in enumerate(self.organoids):
 
             num_frames = self.get_nframes(organoid[0])
-            time_intervals = np.linspace(0, 10, num_frames)
+            end =  num_frames/30
+            time_intervals = np.linspace(0, end, num_frames)
 
             mean_pixel_intensity, heart_rate = zip(*self.process_organoids(*organoid))
 
