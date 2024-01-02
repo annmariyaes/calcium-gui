@@ -66,19 +66,17 @@ def upload_files():
 
     session['all_folders'] = all_folders
     all_folders = session.get('all_folders', [])
+    print(len(all_folders))
 
     # Creating an instance of class
-    s1 = segment.Segmentation(all_folders)
+    s1 = segment.Segmentation(all_folders, text)
+
 
     if request.form['action'] == "Create mean intensity plots":
         # Code to handle intensity plot button click
-        plot1 = s1.generate_intensity_plot()
+        plot1 = s1.display_intensity_plot()
 
-    elif request.form['action'] == "Create heart rate vs concentration plot":
-        # plot1 = s1.generate_intensity_plot()
 
-        # Code to handle heart rate vs concentration plot button click
-        plot2 = (s1.generate_heartrate_plot(text))
 
     return render_template('index.html',
                            intensity_plots=plot1,
