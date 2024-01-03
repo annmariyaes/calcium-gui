@@ -52,7 +52,9 @@ class Unet:
 
         for file in files:
             image_path = os.path.join(folder_path, file)
-            frame = cv2.imread(image_path)
+            frame = Image.open(image_path)
+            # Preprocess the image (resize, normalize, convert to array)
+            frame = frame.resize((128, 128))
             yield frame
 
 
@@ -169,6 +171,6 @@ organoids = [
     ('D:/ann/Experiment/E4031/Normal 3/', 'D:/ann/Experiment/E4031/100 nM E4031 3/', 'D:/ann/Experiment/E4031/500 nM E4031 3/', 'D:/ann/Experiment/E4031/1 uM E4031 3/')
 ]
 
-us1 = Unet(organoids)
+us1 = Unet(organoids, "Nifedifine", 30, 30, [5,10])
 us1.display_intensity_plot()
 '''
