@@ -11,11 +11,14 @@ from concurrent.futures import ThreadPoolExecutor
 
 
 
-class UnetSegmentation:
+class Unet:
 
-    def __init__(self, organoids, concentrations):
+    def __init__(self, organoids, chemical, fps, time, t_range):
         self.organoids = organoids
-        self.concentrations = concentrations
+        self.chemical = chemical
+        self.fps = int(fps)
+        self.time = int(time)
+        self.t_range = t_range
         self.model = load_model('D:/ann/git2/U-Net/updated_unet.h5', compile=False, custom_objects={
                           'mean_iou': self.mean_iou, 'dice_coefficient': self.dice_coefficient, 'pixel_wise_accuracy': self.pixel_wise_accuracy})
 
@@ -37,31 +40,19 @@ class UnetSegmentation:
         return K.mean(K.equal(K.round(y_true), K.round(y_pred)))
 
 
-    def get_nframes(self, folder_path):
-        """
-        :param folder_path: path of frames
-        :return: number of frames in the folder
-        """
-        files = [f for f in os.listdir(folder_path) if f.endswith('.tif')]
-        files = files[:300]
-        return len(files)
-
-
     def frames(self, folder_path):
         """
         :param folder_path: path of each frame
         :return frames: all frames in one folder
         """
-
         files = [f for f in os.listdir(folder_path) if f.endswith('.tif')]
-        files = files[:300]  # 300 frames
+        start = self.fps * int(self.t_range[0])
+        stop = self.fps * int(self.t_range[1])
+        files = files[start:stop]  # 300 frames
 
         for file in files:
             image_path = os.path.join(folder_path, file)
-            frame = Image.open(image_path)
-
-            # Preprocess the image (resize, normalize, convert to array)
-            frame = frame.resize((128, 128))
+            frame = cv2.imread(image_path)
             yield frame
 
 
@@ -86,8 +77,8 @@ class UnetSegmentation:
             # Access the image pixels with white and create a 1D numpy array then add to list
             pts = np.where(mask == 255)
             mean_intensity = np.mean(frame_array[pts[0], pts[1]])
-
             return mean_intensity
+
 
     def process_organoids(self, *organoids):
         results = []
@@ -102,18 +93,16 @@ class UnetSegmentation:
 
 
     def display_intensity_plot(self):
-
+        intensity_plot_paths = []
         for i, organoid in enumerate(self.organoids):
-
-            num_frames = self.get_nframes(organoid[0])
-            stop = num_frames/30
-            time_intervals = np.linspace(0, stop, num_frames)
+            num_frames = self.fps * int(self.t_range[1]) - self.fps * int(self.t_range[0])
+            time_intervals = np.linspace(int(self.t_range[0]), int(self.t_range[1]), num_frames)
             colors = ['green', 'purple', 'orange', 'red']  # Define colors for each concentration
-            title = self.organoids[0][0].split('/')[-3]
-            # pixel intensity plot (assuming there will be 4 plots)
-            fig, axes = plt.subplots(2, 2, figsize=(10, 8))
 
             mean_pixel_intensities, _ = zip(*self.process_organoids(*organoid))
+
+            # pixel intensity plot (assuming there will be 4 plots)
+            fig, axes = plt.subplots(2, 2, figsize=(10, 8))
 
             for j, intensity in enumerate(mean_pixel_intensities):
                 axes[j//2, j%2].plot(time_intervals, intensity, color=colors[j], markersize=1)
@@ -123,9 +112,11 @@ class UnetSegmentation:
 
             # Adjust layout to prevent overlap
             plt.tight_layout()
-            plot_filename = 'static/uploads/' + title + ' intensity ' + str(i+1) + '.png'
+            plot_filename = 'static/uploads/' + self.chemical + ' intensity ' + str(i+1) + '.png'
             plt.savefig(plot_filename)
             plt.close()
+            intensity_plot_paths.append(plot_filename)
+        return intensity_plot_paths
 
 
     def calculate_heart_rate(self, intensity):
@@ -133,10 +124,8 @@ class UnetSegmentation:
         :param intensity: mean pixel intensity of all frames in a particular concentration
         :return: frequency of that intensity
         """
-
         # graph of your waveform doesn't start from zero, it implies that there is a DC offset in your signal
         intensity -= np.mean(intensity)
-
         # DFT of a signal provides a way to represent that signal in terms of its frequency components
         spectrum = fft(intensity)
 
@@ -149,30 +138,26 @@ class UnetSegmentation:
         positive_freq = frequencies[:num_samples//2]
         magnitude = np.abs(spectrum[:num_samples//2])
         dominant_frequency = positive_freq[np.argmax(magnitude)]
-
         return dominant_frequency
 
-    def display_heartrate_plot(self):
 
+    def display_heartrate_plot(self, concentrations):
         heart_rates = []
-        title = self.organoids[0][0].split('/')[-3]
-
         for i, organoid in enumerate(self.organoids):
             _, heart_rate = zip(*self.process_organoids(*organoid))
             heart_rates.append(heart_rate)
 
         # plot of heart rate vs concentration
         for r, heart_rate in enumerate(heart_rates):
-            plt.scatter(self.concentrations, heart_rate, marker='o', label=f'Organoid {r+1}')
+            plt.scatter(concentrations, heart_rate, marker='o', label=f'Organoid {r+1}')
         plt.xlabel('Concentration (nM)')
         plt.ylabel('Heart Rate (Hz)')
-        plt.title(title)
+        plt.title(self.chemical)
         plt.legend()
-        plt.xticks(self.concentrations)
-        heartrate_vs_concentration = 'static/uploads/' + title + ' heart rate.png'
+        plt.xticks(concentrations)
+        heartrate_vs_concentration = 'static/uploads/' + self.chemical + ' heart rate.png'
         plt.savefig(heartrate_vs_concentration)
         plt.close()
-
         return heartrate_vs_concentration
 
 
@@ -184,6 +169,6 @@ organoids = [
     ('D:/ann/Experiment/E4031/Normal 3/', 'D:/ann/Experiment/E4031/100 nM E4031 3/', 'D:/ann/Experiment/E4031/500 nM E4031 3/', 'D:/ann/Experiment/E4031/1 uM E4031 3/')
 ]
 
-us1 = UnetSegmentation(organoids, concentrations)
+us1 = Unet(organoids)
 us1.display_intensity_plot()
 '''

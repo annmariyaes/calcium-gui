@@ -8,23 +8,22 @@ import matplotlib
 matplotlib.use('Agg')
 
 class Segmentation:
-    def __init__(self, organoids, concentrations):
+    def __init__(self, organoids, chemical, fps, time, t_range):
         self.organoids = organoids
-        self.concentrations = concentrations
+        self.chemical = chemical
+        self.fps = int(fps)
+        self.time = int(time)
+        self.t_range = t_range
 
 
     def display_intensity_plot(self):
-
+        intensity_plot_paths = []
         colors = ['green', 'purple', 'orange', 'red']  # Define colors for each concentration
         # title = self.organoids[0][0].split('/')[-3]
-        title = self.organoids[0][0].split('/')[-2].split()[0]
-
         for i, organoid in enumerate(self.organoids):
-
-            num_frames = self.get_nframes(organoid[0])
-            end =  num_frames/30
-            time_intervals = np.linspace(0, end, 300)
-            # pixel intensity plot
+            num_frames = self.fps * int(self.t_range[1]) - self.fps * int(self.t_range[0])
+            time_intervals = np.linspace(int(self.t_range[0]), int(self.t_range[1]), num_frames)
+            # pixel intensity plot (assuming there will be 4 plots)
             fig, axes = plt.subplots(2, 2, figsize=(10, 8))
 
             mean_pixel_intensities, _ = zip(*self.process_organoids(*organoid))
@@ -37,35 +36,32 @@ class Segmentation:
 
             # Adjust layout to prevent overlap
             plt.tight_layout()
-            plot_filename = 'static/uploads/' + title + ' intensity ' + str(i+1) + '.png'
+            plot_filename = 'static/uploads/' + self.chemical + ' intensity ' + str(i+1) + '.png'
             plt.savefig(plot_filename)
             plt.close()
+            intensity_plot_paths.append(plot_filename)
+        return intensity_plot_paths
 
 
-
-    def display_heartrate_plot(self):
-
+    def display_heartrate_plot(self, concentrations):
         heart_rates = []
         # title = self.organoids[0][0].split('/')[-3]
-        title = self.organoids[0][0].split('/')[-2].split()[0]
-
         for i, organoid in enumerate(self.organoids):
             _, heart_rate = zip(*self.process_organoids(*organoid))
             heart_rates.append(heart_rate)
 
         # plot of heart rate vs concentration
         for r, heart_rate in enumerate(heart_rates):
-            plt.scatter(self.concentrations, heart_rate, marker='o', label=f'Organoid {r+1}')
+            plt.scatter(concentrations, heart_rate, marker='o', label=f'Organoid {r+1}')
         plt.xlabel('Concentration (nM)')
         plt.ylabel('Heart Rate (Hz)')
-        plt.title(title)
+        plt.title(self.chemical)
         plt.legend()
-        plt.xticks(self.concentrations)
-        heartrate_vs_concentration = 'static/uploads/' + title + ' heart rate.png'
+        plt.xticks(concentrations)
+        heartrate_vs_concentration = 'static/uploads/' + self.chemical + ' heart rate.png'
         plt.savefig(heartrate_vs_concentration)
         plt.close()
-
-
+        return heartrate_vs_concentration
 
 
     # code optimization
@@ -73,8 +69,6 @@ class Segmentation:
         with ThreadPoolExecutor() as executor:
             results = executor.map(self.process_organoid, organoids)
         return list(results)
-
-
 
     def process_organoid(self, organoid):
         pixel_intensity = [self.roi_mean_intensity(frame) for frame in self.frames(organoid)]
@@ -85,18 +79,6 @@ class Segmentation:
         return normalized, self.calculate_heart_rate(normalized)
 
 
-
-    def get_nframes(self, folder_path):
-        """
-        :param folder_path: path of frames
-        :return: number of frames in the folder
-        """
-        files = [f for f in os.listdir(folder_path) if f.endswith('.tif')]
-        files = files[:300]
-        return len(files)
-
-
-
     def frames(self, folder_path):
         """
         :param folder_path: path of each frame
@@ -104,7 +86,9 @@ class Segmentation:
         """
 
         files = [f for f in os.listdir(folder_path) if f.endswith('.tif')]
-        files = files[:300]  # 300 frames
+        start = self.fps * int(self.t_range[0])
+        stop = self.fps * int(self.t_range[1])
+        files = files[start:stop]  # 300 frames
 
         for file in files:
             image_path = os.path.join(folder_path, file)
@@ -167,10 +151,8 @@ class Segmentation:
             area_pixels = cv2.contourArea(contour)
 
             if area_pixels > 10000:
-
                 # To draw all the contours in an image
                 cv2.drawContours(frame, [contour], -1, (0, 255, 255), 3)
-
                 # Fill the area inside the contour with white
                 mask = np.zeros_like(frame)
                 segmented_frame = cv2.fillPoly(mask, [contour], (255, 255, 255))
@@ -179,11 +161,9 @@ class Segmentation:
                 cv2.waitKey(0)
                 cv2.destroyAllWindows()
                 '''
-
                 # Access the image pixels with white and create a 1D numpy array then add to list
                 pts = np.where(mask == 255)
                 mean_intensity = np.mean(frame[pts[0], pts[1]])
-
                 return mean_intensity
 
 
@@ -193,10 +173,8 @@ class Segmentation:
         :param intensity: mean pixel intensity of all frames in a particular concentration
         :return: frequency of that intensity
         """
-
         # graph of your waveform doesn't start from zero, it implies that there is a DC offset in your signal
         intensity -= np.mean(intensity)
-
         # DFT of a signal provides a way to represent that signal in terms of its frequency components
         spectrum = fft(intensity)
 
@@ -209,7 +187,6 @@ class Segmentation:
         positive_freq = frequencies[:num_samples//2]
         magnitude = np.abs(spectrum[:num_samples//2])
         dominant_frequency = positive_freq[np.argmax(magnitude)]
-
         return dominant_frequency
 
 
