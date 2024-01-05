@@ -108,13 +108,14 @@ class Unet:
 
             for j, intensity in enumerate(mean_pixel_intensities):
                 axes[j//2, j%2].plot(time_intervals, intensity, color=colors[j], markersize=1)
-                axes[j//2, j%2].set_title(organoid[j].split('/')[-2])
+                axes[j//2, j%2].set_title(organoid[j].split('/')[-1])
                 axes[j//2, j%2].set_xlabel('Time (sec)')
                 axes[j//2, j%2].set_ylabel('Mean Intensities (pixels)')
 
             # Adjust layout to prevent overlap
             plt.tight_layout()
-            plot_filename = 'static/uploads/' + self.chemical + ' intensity ' + str(i+1) + '.png'
+            t = self.t_range[0] + '-' + self.t_range[1]
+            plot_filename = 'static/uploads/' + self.chemical + ' intensity t' + t + ' ' + str(i+1) + '.png'
             plt.savefig(plot_filename)
             plt.close()
             intensity_plot_paths.append(plot_filename)
