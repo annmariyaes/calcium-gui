@@ -76,6 +76,9 @@ def upload_files():
     if request.form['action'] == "Create mean intensity plots":
         plot1 = us1.display_intensity_plot()
 
+    elif request.form['action'] == "Create heart rate vs concentration plot":
+        plot1 = us1.display_heartrate_plot()
+
 
     return render_template('index.html',
                            intensity_plots=plot1,
