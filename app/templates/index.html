@@ -19,7 +19,7 @@
                 width: 90%;
                 margin: auto;
                 padding: 30px;
-                background-color: #f9f9f9;
+                background-color: #b7b1b1;
                 border-radius: 10px;
                 box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
             }
@@ -43,7 +43,7 @@
             }
 
             input[type="submit"] {
-                background-color: #333333 ;
+                background-color: #333333;
                 color: white;
                 padding: 10px 20px;
                 border: none;
@@ -52,7 +52,7 @@
             }
 
             input[type="submit"]:hover {
-                background-color: #808080;
+                background-color: #b04242;
             }
 
             img {
@@ -67,17 +67,20 @@
                 margin: auto;
                 background-color: #f9f9f9;
                 border-radius: 10px;
-                box-shadow: 0 8px 8px rgba(0, 0, 0, 0.5);
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
             }
 
-            .center-content {
+            .w3-bar {
+                color: #b04242;
                 display: flex;
                 justify-content: center;
+                font-size: 25px;
+                font-weight: bold;
             }
 
-            .larger-text {
-                font-size: 20px;
-                font-weight: bold;
+            .w3-button.active {
+                background-color: #b7b1b1;
+                color: #000000;
             }
 
             .logo {
@@ -103,11 +106,12 @@
 
 
         <div class="container">
-            <div class="w3-bar w3-pale-red center-content">
-                <button class="w3-bar-item w3-button larger-text active" onclick="openLinks('Intensity')"> Pixel intensity </button>
-                <button class="w3-bar-item w3-button larger-text active" onclick="openLinks('Rate')"> Heart rate </button>
+            <div class="w3-bar">
+                <button class="w3-bar-item w3-button " onclick="openTabs('Intensity', this)"> Pixel intensity </button>
+                <button class="w3-bar-item w3-button " onclick="openTabs('Rate', this)"> Heart rate </button>
             </div>
         </div>
+
 
         <form action="/upload" method="post" enctype="multipart/form-data">
             <div id="Intensity" class="w3-container option">
@@ -190,18 +194,26 @@
         </form>
 
 
-
         <script>
-            function openLinks(opName) {
+            function openTabs(opName, button) {
                 var i;
                 var x = document.getElementsByClassName("option");
                 for (i = 0; i < x.length; i++) {
                     x[i].style.display = "none";
                 }
                 document.getElementById(opName).style.display = "block";
-            }
 
+                // Remove 'active' class from all buttons
+                var buttons = document.getElementsByClassName("w3-button");
+                for (i = 0; i < buttons.length; i++) {
+                    buttons[i].classList.remove("active");
+                }
+
+                // Add 'active' class to the clicked button
+                button.classList.add("active");
+            }
         </script>
+
 
     </body>
 </html>

@@ -66,6 +66,9 @@ def upload_files():
     time2 = request.form['time2_textbox']
     times = [str(x.strip()) for x in ''.join(time2).split('-')]
 
+    textbox_value = request.form['textbox']
+    concentrations = [str(x.strip()) for x in ''.join(textbox_value).split(',')]
+
 
     # Creating an instance of class
     # s1 = segment.Segmentation(all_folders, chemical, fps, time, times)
@@ -77,18 +80,20 @@ def upload_files():
         plot1 = us1.display_intensity_plot()
 
     elif request.form['action'] == "Create heart rate vs concentration plot":
-        plot1 = us1.display_heartrate_plot()
+        plot2 = us1.display_heartrate_plot(concentrations)
 
 
     return render_template('index.html',
                            intensity_plots=plot1,
+                           plot_heartrate=plot2,
                            zip1=f1.filename,
                            zip2=f2.filename,
                            zip3=f3.filename,
                            chemical=chemical,
                            fps=fps,
                            time=time,
-                           times=time2)
+                           times=time2,
+                           concentration=concentrations)
 
 
 if __name__ == '__main__':
