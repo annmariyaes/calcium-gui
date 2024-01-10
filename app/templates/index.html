@@ -10,8 +10,9 @@
 
             h1 {
                 text-align: center;
-                font-weight: bold;
-                padding: 40px;
+                padding: 60px;
+                font-weight: bold !important;
+                font-size: 50px !important;
                 background-color: #F5F5F5;
             }
 
@@ -78,6 +79,12 @@
                 font-weight: bold;
             }
 
+            .row {
+                display: grid;
+                grid-template-columns: auto auto;
+            }
+
+
             .w3-button.active {
                 background-color: #b7b1b1;
                 color: #000000;
@@ -104,7 +111,6 @@
             <hr>
         </div>
 
-
         <div class="container">
             <div class="w3-bar">
                 <button class="w3-bar-item w3-button " onclick="openTabs('Intensity', this)"> Pixel intensity </button>
@@ -113,82 +119,96 @@
         </div>
 
 
-        <form action="/upload" method="post" enctype="multipart/form-data">
-            <div id="Intensity" class="w3-container option">
+        <form action="/intensity" method="post" enctype="multipart/form-data">
 
-                <label for="che_textbox">Chemical solution name: </label>
-                <input type="text" name="che_textbox" placeholder="(eg: Nifedifine)" value="{{ chemical }}"><br>
+            <div id="Intensity" class="row">
+                <div class="col">
 
-                <label for="fps">Frames per second: </label>
-                <input type="text" name="fps" placeholder="(eg: 30 fps)" value="{{ fps }}"><br>
-                <label for="time1_textbox">Time duration: </label>
-                <input type="text" name="time1_textbox" placeholder="(eg: 30 seconds)" value="{{ time }}"><br>
-                <label for="time2_textbox">Pick the range of time: </label>
-                <input type="text" name="time2_textbox" placeholder="(eg: 0-10)" value="{{ times }}"><br>
+                    <label for="che_textbox">Chemical solution name: </label>
+                    <input type="text" name="che_textbox" placeholder="(eg: Nifedifine)" value="{{ chemical }}"><br>
 
-
-                <label for="file1">Upload Organoid zip file 1:</label>
-                <input type="file" name="file1" accept=".zip" value="{{ zip1 }}"><br>
-
-                <label for="file2">Upload Organoid zip file 2:</label>
-                <input type="file" name="file2" accept=".zip" value="{{ zip2 }}"><br>
-
-                <label for="file3">Upload Organoid zip file 3:</label>
-                <input type="file" name="file3" accept=".zip" value="{{ zip3 }}"><br><br>
-
-                <div>
-                    <input type="submit" name="action" value="Create mean intensity plots" id="submit-intensity" onclick="submitForm('Create mean intensity plots')">
-                </div>
+                    <label for="fps">Frames per second: </label>
+                    <input type="text" name="fps" placeholder="(eg: 30 fps)" value="{{ fps }}"><br>
+                    <label for="time1_textbox">Time duration: </label>
+                    <input type="text" name="time1_textbox" placeholder="(eg: 30 seconds)" value="{{ time }}"><br>
+                    <label for="time2_textbox">Pick the range of time: </label>
+                    <input type="text" name="time2_textbox" placeholder="(eg: 0-10)" value="{{ times }}"><br>
 
 
-                {% if intensity_plots %}
-                    <div style="display: flex;  flex-direction: column;">
-                        {% for intensity_plot in intensity_plots %}
-                              <div style="margin-left: 10px;">
-                                  <img src="{{ intensity_plot }}" alt="Intensity Plot">
-                              </div> <br><br>
-                        {% endfor %}
+                    <label for="file1">Upload Organoid zip file 1:</label>
+                    <input type="file" name="file1" accept=".zip" value="{{ zip1 }}"><br>
+
+                    <label for="file2">Upload Organoid zip file 2:</label>
+                    <input type="file" name="file2" accept=".zip" value="{{ zip2 }}"><br>
+
+                    <label for="file3">Upload Organoid zip file 3:</label>
+                    <input type="file" name="file3" accept=".zip" value="{{ zip3 }}"><br><br>
+
+                    <div>
+                        <input type="submit" name="action" value="Create mean intensity plots" id="submit-intensity" onclick="submitForm('Create mean intensity plots')">
                     </div>
-                {% endif %}
 
-                <br><br><br>
-            </div>
-
-
-            <div id="Rate" class="option" style="display:none">
-
-                <label for="che_textbox">Chemical solution name: </label>
-                <input type="text" name="che_textbox" placeholder="(eg: Nifedifine)" value="{{ chemical }}"><br>
-
-                <label for="fps">Frames per second: </label>
-                <input type="text" name="fps" placeholder="(eg: 30 fps)" value="{{ fps }}"><br>
-                <label for="time1_textbox">Time duration: </label>
-                <input type="text" name="time1_textbox" placeholder="(eg: 30 seconds)" value="{{ time }}"><br>
-                <label for="time2_textbox">Pick the range of time: </label>
-                <input type="text" name="time2_textbox" placeholder="(eg: 0-10)" value="{{ times }}"><br>
-
-
-                <label for="file1">Upload Organoid zip file 1:</label>
-                <input type="file" name="file1" accept=".zip" value="{{ zip1 }}"><br>
-
-                <label for="file2">Upload Organoid zip file 2:</label>
-                <input type="file" name="file2" accept=".zip" value="{{ zip2 }}"><br>
-
-                <label for="file3">Upload Organoid zip file 3:</label>
-                <input type="file" name="file3" accept=".zip" value="{{ zip3 }}"><br><br>
-
-                <label for="textbox">Concentrations: </label>
-                <input type="text" name="textbox" placeholder="(eg: 0, 100, 500, 1000)" value="{{ concentrations }}"><br><br>
-
-                <div>
-                    <input type="submit" name="action" value="Create heart rate vs concentration plot" id="submit-rate-vs-con" onclick="submitForm('Create heart rate vs concentration plot')">
+                    <p>{{ zip1 }}</p>
+                    <p>{{ zip2 }}</p>
+                    <p>{{ zip3 }}</p>
                 </div>
 
-                {% if plot_heartrate %}
-                    <img src="{{ plot_heartrate }}" alt="Plot">
-                {% endif %}
-                <br><br><br>
+                <div class="col">
+                    {% if intensity_plots %}
+                        <div style="display: flex;  flex-direction: column;">
+                            {% for intensity_plot in intensity_plots %}
+                                  <div style="margin-left: 10px;">
+                                      <img src="{{ intensity_plot }}" alt="Intensity Plot">
+                                  </div> <br><br>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </form>
 
+
+
+        <form action="/rate" method="post" enctype="multipart/form-data">
+            <div id="Rate" class="row" style="display:none">
+                <div class="col">
+                    <label for="che_textbox">Chemical solution name: </label>
+                    <input type="text" name="che_textbox" placeholder="(eg: Nifedifine)" value="{{ chemical }}"><br>
+
+                    <label for="fps">Frames per second: </label>
+                    <input type="text" name="fps" placeholder="(eg: 30 fps)" value="{{ fps }}"><br>
+                    <label for="time1_textbox">Time duration: </label>
+                    <input type="text" name="time1_textbox" placeholder="(eg: 30 seconds)" value="{{ time }}"><br>
+                    <label for="time2_textbox">Pick the range of time: </label>
+                    <input type="text" name="time2_textbox" placeholder="(eg: 0-10)" value="{{ times }}"><br>
+
+
+                    <label for="file1">Upload Organoid zip file 1:</label>
+                    <input type="file" name="file1" accept=".zip" value="{{ zip1 }}"><br>
+
+                    <label for="file2">Upload Organoid zip file 2:</label>
+                    <input type="file" name="file2" accept=".zip" value="{{ zip2 }}"><br>
+
+                    <label for="file3">Upload Organoid zip file 3:</label>
+                    <input type="file" name="file3" accept=".zip" value="{{ zip3 }}"><br><br>
+
+                    <label for="textbox">Concentrations: </label>
+                    <input type="text" name="textbox" placeholder="(eg: 0, 100, 500, 1000)" value="{{ concentrations }}"><br><br>
+
+                    <div>
+                        <input type="submit" name="action" value="Create heart rate vs concentration plot" id="submit-rate-vs-con" onclick="submitForm('Create heart rate vs concentration plot')">
+                    </div>
+
+                    <p>{{ zip1 }}</p>
+                    <p>{{ zip2 }}</p>
+                    <p>{{ zip3 }}</p>
+                </div>
+
+                <div class="col">
+                    {% if plot_heartrate %}
+                        <img src="{{ plot_heartrate }}" alt="Plot">
+                    {% endif %}
+                </div>
             </div>
 
         </form>
@@ -197,11 +217,11 @@
         <script>
             function openTabs(opName, button) {
                 var i;
-                var x = document.getElementsByClassName("option");
+                var x = document.getElementsByClassName("row");
                 for (i = 0; i < x.length; i++) {
                     x[i].style.display = "none";
                 }
-                document.getElementById(opName).style.display = "block";
+                document.getElementById(opName).style.display = "grid";
 
                 // Remove 'active' class from all buttons
                 var buttons = document.getElementsByClassName("w3-button");
