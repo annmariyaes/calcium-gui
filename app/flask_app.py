@@ -1,6 +1,6 @@
 import os
 import zipfile
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, send_file
 from werkzeug.utils import secure_filename
 import matplotlib
 matplotlib.use('Agg')
@@ -11,7 +11,7 @@ import unetsegment
 app = Flask(__name__)
 UPLOAD_FOLDER = 'static/uploads/'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.secret_key = 'your_secret_key_here'
+
 
 
 @app.route('/')
@@ -82,13 +82,13 @@ def intensities():
 
     return render_template('index.html',
                            intensity_plots=plot1,
-                            zip1=f1.filename,
-                            zip2=f2.filename,
-                            zip3=f3.filename,
-                            chemical=chemical,
-                            fps=fps,
-                            time=time,
-                            times=time2)
+                            zip11=f1.filename,
+                            zip21=f2.filename,
+                            zip31=f3.filename,
+                            chemical1=chemical,
+                            fps1=fps,
+                            time1=time,
+                            times1=time2)
 
 
 
@@ -161,14 +161,28 @@ def rates():
 
     return render_template('index.html',
                             plot_heartrate=plot2,
-                            zip1=f1.filename,
-                            zip2=f2.filename,
-                            zip3=f3.filename,
-                            chemical=chemical,
-                            fps=fps,
-                            time=time,
-                            times=time2,
+                            zip12=f1.filename,
+                            zip22=f2.filename,
+                            zip32=f3.filename,
+                            chemical2=chemical,
+                            fps2=fps,
+                            time2=time,
+                            times2=time2,
                             concentrations=con_vals)
+
+
+'''
+from flask_sqlalchemy import SQLAlchemy
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite3'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(app)
+
+@app.route('/download/<upload_id>')
+def download(upload_id):
+    upload = Upload.query.filter_by(id=upload_id).first()
+    return send_file(BytesIO(upload.data),
+                     download_name=upload.filename, as_attachment=True)
+'''
 
 
 if __name__ == '__main__':
