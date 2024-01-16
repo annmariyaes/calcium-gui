@@ -152,7 +152,8 @@ class Unet:
 
         # plot of heart rate vs concentration
         for r, heart_rate in enumerate(heart_rates):
-            plt.scatter(concentrations, heart_rate, marker='o', label=f'Organoid {r+1}')
+            marker_size = 10+r*5
+            plt.scatter(concentrations, heart_rate, marker='o', s=marker_size, label=f'Organoid {r+1}')
         plt.xlabel('Concentration (nM)')
         plt.ylabel('Heart Rate (Hz)')
         plt.title(self.chemical)
