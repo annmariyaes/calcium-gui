@@ -4,11 +4,15 @@
 
         <title>heart rate</title>
         <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='style.css') }}">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+        <link rel="stylesheet" href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css" type="text/css" />
 
     </head>
 
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+
+
+
 
     <body>
 
@@ -20,8 +24,8 @@
 
         <div class="container">
             <div class="w3-bar">
-                <button class="w3-bar-item w3-button " onclick="openTabs('Intensity', this)"> Pixel intensity </button>
-                <button class="w3-bar-item w3-button " onclick="openTabs('Rate', this)"> Heart rate </button>
+                <button class="w3-bar-item w3-button" onclick="openTabs('Intensity', this)"> Pixel intensity </button>
+                <button class="w3-bar-item w3-button" onclick="openTabs('Rate', this)"> Heart rate </button>
             </div>
         </div>
 
@@ -31,33 +35,17 @@
             <div class="row">
                 <div class="col">
 
-                    <label for="che_textbox">Chemical solution name: </label>
-                    <input type="text" name="che_textbox" placeholder="(eg: Nifedifine)" value="{{ chemical1 }}"><br>
+                    <label>Chemical solution name: <input type="text" id="chemical1" name="chemical1" placeholder="(eg: Nifedifine)" value="{{ chemical1 }}"> </label><br>
+                    <label>Frames per second: <input type="text" id="fps1" name="fps1" placeholder="(eg: 30 fps)" value="{{ fps1 }}"></label><br>
+                    <label>Time duration: <input type="text" id="time1_textbox1" name="time1_textbox1" placeholder="(eg: 30 seconds)" value="{{ time1 }}"></label><br>
+                    <label>Pick the range of time: <input type="text" id="time2_textbox1" name="time2_textbox1" placeholder="(eg:1-5)" value="{{ times1 }}"></label><br><br>
 
-                    <label for="fps">Frames per second: </label>
-                    <input type="text" name="fps" placeholder="(eg: 30 fps)" value="{{ fps1 }}"><br>
-                    <label for="time1_textbox">Time duration: </label>
-                    <input type="text" name="time1_textbox" placeholder="(eg: 30 seconds)" value="{{ time1 }}"><br>
-                    <label for="time2_textbox">Pick the range of time: </label>
-                    <input type="text" name="time2_textbox" placeholder="(eg: 0-10)" value="{{ times1 }}"><br>
-
-
-                    <label for="file1">Upload Organoid zip file 1:</label>
-                    <input type="file" name="file1" accept=".zip" value="{{ zip11 }}"><br>
-
-                    <label for="file2">Upload Organoid zip file 2:</label>
-                    <input type="file" name="file2" accept=".zip" value="{{ zip21 }}"><br>
-
-                    <label for="file3">Upload Organoid zip file 3:</label>
-                    <input type="file" name="file3" accept=".zip" value="{{ zip31 }}"><br><br>
+                    <div class="dropzone dz-clickable" id="dropper1"></div><br>
 
                     <div>
-                        <input type="submit" name="action" value="Create mean intensity plots" id="submit-intensity" onclick="submitForm('Create mean intensity plots')">
+                        <input type="submit" name="action" value="Create mean intensity plots" id="submit-intensity" onclick="submitForm('Create mean intensity plots', 'Intensity')">
                     </div>
 
-                    <p>{{ zip11 }}</p>
-                    <p>{{ zip21 }}</p>
-                    <p>{{ zip31 }}</p>
                 </div>
 
                 <div class="col">
@@ -75,40 +63,23 @@
         </form>
 
 
-
         <form action="/rate" method="post" enctype="multipart/form-data" class="tab-content" id="Rate">
             <div class="row" >
                 <div class="col">
-                    <label for="che_textbox2">Chemical solution name: </label>
-                    <input type="text" name="che_textbox" placeholder="(eg: Nifedifine)" value="{{ chemical2 }}"><br>
 
-                    <label for="fps">Frames per second: </label>
-                    <input type="text" name="fps" placeholder="(eg: 30 fps)" value="{{ fps2 }}"><br>
-                    <label for="time1_textbox">Time duration: </label>
-                    <input type="text" name="time1_textbox" placeholder="(eg: 30 seconds)" value="{{ time2 }}"><br>
-                    <label for="time2_textbox">Pick the range of time: </label>
-                    <input type="text" name="time2_textbox" placeholder="(eg: 0-10)" value="{{ times2 }}"><br>
+                    <label>Chemical solution name: <input type="text" id="chemical2" name="chemical2" placeholder="(eg: Nifedifine)" value="{{ chemical2 }}"> </label><br>
+                    <label>Frames per second: <input type="text" id="fps2" name="fps2" placeholder="(eg: 30 fps)" value="{{ fps2 }}"></label><br>
+                    <label>Time duration: <input type="text" id="time1_textbox2" name="time1_textbox2" placeholder="(eg: 30 seconds)" value="{{ time2 }}"></label><br>
+                    <label>Pick the range of time: <input type="text" id="time2_textbox2" name="time2_textbox2" placeholder="(eg:1-5)" value="{{ times2 }}"></label><br>
 
+                    <label>Concentrations: <input type="text" id="textbox" name="textbox" placeholder="(eg: 0, 100, 500, 1000)" value="{{ concentrations }}"></label><br><br>
 
-                    <label for="file1">Upload Organoid zip file 1:</label>
-                    <input type="file" name="file1" accept=".zip" value="{{ zip12 }}"><br>
-
-                    <label for="file2">Upload Organoid zip file 2:</label>
-                    <input type="file" name="file2" accept=".zip" value="{{ zip22 }}"><br>
-
-                    <label for="file3">Upload Organoid zip file 3:</label>
-                    <input type="file" name="file3" accept=".zip" value="{{ zip32 }}"><br><br>
-
-                    <label for="textbox">Concentrations: </label>
-                    <input type="text" name="textbox" placeholder="(eg: 0, 100, 500, 1000)" value="{{ concentrations }}"><br><br>
+                    <div class="dropzone dz-clickable" id="dropper2"></div><br>
 
                     <div>
                         <input type="submit" name="action" value="Create heart rate vs concentration plot" id="submit-rate-vs-con" onclick="submitForm('Create heart rate vs concentration plot')">
                     </div>
 
-                    <p>{{ zip12 }}</p>
-                    <p>{{ zip22 }}</p>
-                    <p>{{ zip32 }}</p>
                 </div>
 
                 <div class="col">
@@ -117,11 +88,11 @@
                     {% endif %}
                 </div>
             </div>
-
         </form>
 
-
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.2/min/dropzone.min.js"></script>
         <script src="{{url_for('static', filename='features.js')}}"></script>
+
 
     </body>
 </html>

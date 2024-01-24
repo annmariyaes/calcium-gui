@@ -26,4 +26,51 @@ function openTabs(opName, button) {
 document.addEventListener("DOMContentLoaded", function() {
     var defaultTab = document.getElementsByClassName("w3-button")[0];
     openTabs('Intensity', defaultTab);
-});
+
+})
+
+function submitForm(action, tabName) {
+    var form = document.getElementById(tabName);
+    form.querySelector('input[name="action"]').value = action;
+    form.submit();
+}
+
+// Dropzone.js splits the file into chunks and uploads them one at a time.
+Dropzone.options.dropper1 = {
+    paramName: "zipfile",
+    chunking: true,
+    forceChunking: true,
+    timeout: null,
+    acceptedFiles: ".zip",
+    url: "/intensity",
+    dictDefaultMessage: "Drop zip files here to upload",
+    maxFilesize: '4GB',
+    chunkSize: 90000000000000, // bytes
+
+    init: function() {
+        this.on("sending", function(file, xhr, formData) {
+            // Append additional form data
+            formData.append('chemical1', document.getElementById('chemical1').value);
+            formData.append('fps1', document.getElementById('fps1').value);
+            formData.append('time1_textbox1', document.getElementById('time1_textbox1').value);
+            formData.append('time2_textbox1', document.getElementById('time2_textbox1').value);
+        });
+        this.on("success", function (file, response) {
+            // Handle success, you can update UI or display a message
+            console.log(response.message);
+            file.previewElement.classList.add("dz-success");
+        });
+    }
+};
+
+Dropzone.options.dropper2 = {
+    paramName: "zipfile",
+    chunking: true,
+    forceChunking: true,
+    timeout: null,
+    acceptedFiles: ".zip",
+    url: "/rate",
+    dictDefaultMessage: "Drop zip files here to upload",
+    maxFilesize: 4096, // megabytes
+    chunkSize: 90000000000000 // bytes
+};

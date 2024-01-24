@@ -19,7 +19,7 @@ class Unet:
         self.fps = int(fps)
         self.time = int(time)
         self.t_range = t_range
-        self.model = load_model('D:/ann/git2/U-Net/updated_unet.h5', compile=False, custom_objects={
+        self.model = load_model('C:/Users/annma/PycharmProjects/calcium-gui/U-Net/updated_unet.h5', compile=False, custom_objects={
                           'mean_iou': self.mean_iou, 'dice_coefficient': self.dice_coefficient, 'pixel_wise_accuracy': self.pixel_wise_accuracy})
 
 
