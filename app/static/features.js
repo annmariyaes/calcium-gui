@@ -44,7 +44,7 @@ Dropzone.options.dropper1 = {
     acceptedFiles: ".zip",
     url: "/intensity",
     dictDefaultMessage: "Drop zip files here to upload",
-    maxFilesize: '4GB',
+    maxFilesize: '10GB',
     chunkSize: 90000000000000, // bytes
 
     init: function() {
@@ -71,6 +71,21 @@ Dropzone.options.dropper2 = {
     acceptedFiles: ".zip",
     url: "/rate",
     dictDefaultMessage: "Drop zip files here to upload",
-    maxFilesize: 4096, // megabytes
-    chunkSize: 90000000000000 // bytes
+    maxFilesize: '10GB',
+    chunkSize: 90000000000000, // bytes
+    init: function() {
+        this.on("sending", function(file, xhr, formData) {
+            // Append additional form data
+            formData.append('chemical2', document.getElementById('chemical2').value);
+            formData.append('fps2', document.getElementById('fps2').value);
+            formData.append('time1_textbox2', document.getElementById('time1_textbox2').value);
+            formData.append('time2_textbox2', document.getElementById('time2_textbox2').value);
+            formData.append('textbox', document.getElementById('textbox').value);
+        });
+        this.on("success", function (file, response) {
+            // Handle success, you can update UI or display a message
+            console.log(response.message);
+            file.previewElement.classList.add("dz-success");
+        });
+    }
 };

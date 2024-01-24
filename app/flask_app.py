@@ -10,7 +10,7 @@ import unetsegment
 app = Flask(__name__)
 UPLOAD_FOLDER = 'static/uploads/'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-all_folders = []
+all_folders1, all_folders2 = [], []
 
 
 @app.route('/')
@@ -43,7 +43,7 @@ def intensities():
             folder = os.path.join(extracted_folder_path, fold)
             folder = folder.replace('\\', '/')
             folders.append(folder)
-        all_folders.append(folders)
+        all_folders1.append(folders)
 
     # textbox to enter chemical
     chemical = request.form['chemical1']
@@ -59,18 +59,17 @@ def intensities():
     times = [str(x.strip()) for x in ''.join(time2).split('-')]
 
     # Creating an instance of class
-    us1 = unetsegment.Unet(all_folders, chemical, fps, time, times)
+    us1 = unetsegment.Unet(all_folders1, chemical, fps, time, times)
 
-    print(all_folders)
+    print(all_folders1)
     print(time)
-    print(request.form)
 
     # Code to handle button click
     if request.form.get('action') == "Create mean intensity plots":
         plot1 = us1.display_intensity_plot()
 
     return render_template('index.html',
-                           plot_heartrate=plot1,
+                           intensity_plots=plot1,
                            chemical1=chemical,
                            fps1=fps,
                            time1=time,
@@ -80,12 +79,11 @@ def intensities():
 @app.route('/rate', methods=['GET', 'POST'])
 def rates():
     plot2 = None
-    all_folders = []
     zip_files = request.files.getlist('zipfile')
-    print(zip_files)
 
     # Extract the contents of the zip file
     for zip_file in zip_files:
+        print(zip_file.filename)
         file_path = os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(zip_file.filename))
         zip_file.save(file_path)
 
@@ -102,7 +100,7 @@ def rates():
             folder = os.path.join(extracted_folder_path, fold)
             folder = folder.replace('\\', '/')
             folders.append(folder)
-        all_folders.append(folders)
+        all_folders2.append(folders)
 
     # textbox to enter chemical
     chemical = request.form['chemical2']
@@ -122,7 +120,10 @@ def rates():
 
     # Creating an instance of class
     # s1 = segment.Segmentation(all_folders, chemical, fps, time, times)
-    us1 = unetsegment.Unet(all_folders, chemical, fps, time, times)
+    us1 = unetsegment.Unet(all_folders2, chemical, fps, time, times)
+
+    print(all_folders2)
+    print(time)
 
     # Code to handle button click
     if request.form.get('action') == "Create heart rate vs concentration plot":
