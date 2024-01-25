@@ -1,7 +1,8 @@
 import os
 import zipfile
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify, redirect, url_for
 from werkzeug.utils import secure_filename
+from werkzeug.datastructures import CombinedMultiDict
 import matplotlib
 matplotlib.use('Agg')
 import unetsegment
@@ -24,9 +25,11 @@ def intensities():
 
     zip_files = request.files.getlist('zipfile')
 
-    # Extract the contents of the zip file
+    names = []
     for zip_file in zip_files:
         print(zip_file.filename)
+        names.append(secure_filename(zip_file.filename))
+
         file_path = os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(zip_file.filename))
         zip_file.save(file_path)
 
@@ -34,6 +37,7 @@ def intensities():
             f.seek(int(request.form["dzchunkbyteoffset"]))
             f.write(zip_file.stream.read())
 
+        # Extract the contents of the zip file
         with zipfile.ZipFile(file_path, 'r') as zip_ref:
             zip_ref.extractall(os.path.join(app.config['UPLOAD_FOLDER'], zip_file.filename[:-4]))
         extracted_folder_path = os.path.join(app.config['UPLOAD_FOLDER'], zip_file.filename[:-4])
@@ -62,7 +66,7 @@ def intensities():
     us1 = unetsegment.Unet(all_folders1, chemical, fps, time, times)
 
     print(all_folders1)
-    print(time)
+    print(names)
 
     # Code to handle button click
     if request.form.get('action') == "Create mean intensity plots":
@@ -73,15 +77,16 @@ def intensities():
                            chemical1=chemical,
                            fps1=fps,
                            time1=time,
-                           times1=time2)
+                           times1=time2,
+                           names=names)
 
 
 @app.route('/rate', methods=['GET', 'POST'])
 def rates():
     plot2 = None
+
     zip_files = request.files.getlist('zipfile')
 
-    # Extract the contents of the zip file
     for zip_file in zip_files:
         print(zip_file.filename)
         file_path = os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(zip_file.filename))
@@ -123,7 +128,7 @@ def rates():
     us1 = unetsegment.Unet(all_folders2, chemical, fps, time, times)
 
     print(all_folders2)
-    print(time)
+    print(zip_files)
 
     # Code to handle button click
     if request.form.get('action') == "Create heart rate vs concentration plot":

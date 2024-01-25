@@ -43,9 +43,10 @@ Dropzone.options.dropper1 = {
     timeout: null,
     acceptedFiles: ".zip",
     url: "/intensity",
-    dictDefaultMessage: "Drop zip files here to upload",
+    parallelUploads: 5,
     maxFilesize: '10GB',
     chunkSize: 90000000000000, // bytes
+    dictDefaultMessage: "Drop zip files here to upload",
 
     init: function() {
         this.on("sending", function(file, xhr, formData) {
@@ -70,9 +71,10 @@ Dropzone.options.dropper2 = {
     timeout: null,
     acceptedFiles: ".zip",
     url: "/rate",
-    dictDefaultMessage: "Drop zip files here to upload",
+    parallelUploads: 5,
     maxFilesize: '10GB',
     chunkSize: 90000000000000, // bytes
+    dictDefaultMessage: "Drop zip files here to upload",
     init: function() {
         this.on("sending", function(file, xhr, formData) {
             // Append additional form data

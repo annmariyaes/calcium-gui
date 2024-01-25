@@ -72,7 +72,6 @@ img {
 
 .w3-button.active {
     background-color: #b7b1b1;
-
     color: #000000;
 }
 
@@ -92,6 +91,6 @@ img {
 
 .dropzone {
     border: dashed !important;
-    border-color: #ccc !important;
+    border-color: #cccccc !important;
     border-radius: 15px !important;
 }

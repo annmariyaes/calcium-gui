@@ -2,7 +2,7 @@
 <html>
     <head>
 
-        <title>heart rate</title>
+        <title>organoid</title>
         <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='style.css') }}">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
@@ -34,10 +34,14 @@
 
                     <label>Chemical solution name: <input type="text" id="chemical1" name="chemical1" placeholder="(eg: Nifedifine)" value="{{ chemical1 }}"> </label><br>
                     <label>Frames per second: <input type="text" id="fps1" name="fps1" placeholder="(eg: 30 fps)" value="{{ fps1 }}"></label><br>
-                    <label>Time duration: <input type="text" id="time1_textbox1" name="time1_textbox1" placeholder="(eg: 30 seconds)" value="{{ time1 }}"></label><br>
+                    <label>Time duration: <input type="text" id="time1_textbox1" name="time1_textbox1" placeholder="(eg: 30 sec)" value="{{ time1 }}"></label><br>
                     <label>Pick the range of time: <input type="text" id="time2_textbox1" name="time2_textbox1" placeholder="(eg:1-5)" value="{{ times1 }}"></label><br><br>
 
-                    <div class="dropzone dz-clickable" id="dropper1"></div><br>
+                    <div class="dropzone dz-clickable" id="dropper1" name="zipfile">
+                        {% for name in names %}
+                            <div>{{ name }}</div>
+                        {% endfor %}
+                    </div><br>
 
                     <div>
                         <input type="submit" name="action" value="Create mean intensity plots" id="submit-intensity" onclick="submitForm('Create mean intensity plots', 'Intensity')">
@@ -66,7 +70,7 @@
 
                     <label>Chemical solution name: <input type="text" id="chemical2" name="chemical2" placeholder="(eg: Nifedifine)" value="{{ chemical2 }}"> </label><br>
                     <label>Frames per second: <input type="text" id="fps2" name="fps2" placeholder="(eg: 30 fps)" value="{{ fps2 }}"></label><br>
-                    <label>Time duration: <input type="text" id="time1_textbox2" name="time1_textbox2" placeholder="(eg: 30 seconds)" value="{{ time2 }}"></label><br>
+                    <label>Time duration: <input type="text" id="time1_textbox2" name="time1_textbox2" placeholder="(eg: 30 sec)" value="{{ time2 }}"></label><br>
                     <label>Pick the range of time: <input type="text" id="time2_textbox2" name="time2_textbox2" placeholder="(eg:1-5)" value="{{ times2 }}"></label><br>
 
                     <label>Concentrations: <input type="text" id="textbox" name="textbox" placeholder="(eg: 0, 100, 500, 1000)" value="{{ concentrations }}"></label><br><br>
