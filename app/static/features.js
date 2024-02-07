@@ -35,59 +35,37 @@ function submitForm(action, tabName) {
     form.submit();
 }
 
+var fileList = {};
+
 // Dropzone.js splits the file into chunks and uploads them one at a time.
-Dropzone.options.dropper1 = {
+Dropzone.options.dropper = {
     paramName: "zipfile",
     chunking: true,
     forceChunking: true,
-    timeout: null,
+    addRemoveLinks: true,
     acceptedFiles: ".zip",
     url: "/intensity",
-    parallelUploads: 5,
     maxFilesize: '10GB',
-    chunkSize: 90000000000000, // bytes
-    dictDefaultMessage: "Drop zip files here to upload",
+    chunkSize: 9000000000000000000, // bytes
 
     init: function() {
-        this.on("sending", function(file, xhr, formData) {
-            // Append additional form data
-            formData.append('chemical1', document.getElementById('chemical1').value);
-            formData.append('fps1', document.getElementById('fps1').value);
-            formData.append('time1_textbox1', document.getElementById('time1_textbox1').value);
-            formData.append('time2_textbox1', document.getElementById('time2_textbox1').value);
-        });
-        this.on("success", function (file, response) {
-            // Handle success, you can update UI or display a message
-            console.log(response.message);
-            file.previewElement.classList.add("dz-success");
-        });
-    }
-};
 
-Dropzone.options.dropper2 = {
-    paramName: "zipfile",
-    chunking: true,
-    forceChunking: true,
-    timeout: null,
-    acceptedFiles: ".zip",
-    url: "/rate",
-    parallelUploads: 5,
-    maxFilesize: '10GB',
-    chunkSize: 90000000000000, // bytes
-    dictDefaultMessage: "Drop zip files here to upload",
-    init: function() {
+        // Append additional form data
         this.on("sending", function(file, xhr, formData) {
-            // Append additional form data
-            formData.append('chemical2', document.getElementById('chemical2').value);
-            formData.append('fps2', document.getElementById('fps2').value);
-            formData.append('time1_textbox2', document.getElementById('time1_textbox2').value);
-            formData.append('time2_textbox2', document.getElementById('time2_textbox2').value);
+            formData.append('chemical', document.getElementById('chemical').value);
+            formData.append('fps', document.getElementById('fps').value);
+            formData.append('time1_textbox', document.getElementById('time1_textbox').value);
+            formData.append('time2_textbox', document.getElementById('time2_textbox').value);
             formData.append('textbox', document.getElementById('textbox').value);
+            // formData.append('zipfile', file);
         });
+
+        // Handle success, you can update UI or display a message
         this.on("success", function (file, response) {
-            // Handle success, you can update UI or display a message
-            console.log(response.message);
+            console.log(response);
             file.previewElement.classList.add("dz-success");
         });
+
     }
 };
+

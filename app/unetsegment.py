@@ -4,6 +4,7 @@ import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt
 from scipy.fft import fft, fftfreq
+from scipy.signal import argrelextrema, find_peaks
 
 from keras.models import load_model
 import tensorflow.python.keras.backend as K
@@ -19,8 +20,8 @@ class Unet:
         self.fps = int(fps)
         self.time = int(time)
         self.t_range = t_range
-        # D:/ann/calcium-gui/U-Net/updated_unet.h5
-        self.model = load_model('C:/Users/annma/PycharmProjects/calcium-gui/U-Net/updated_unet.h5', compile=False, custom_objects={
+        # C:/Users/annma/PycharmProjects/calcium-gui/U-Net/updated_unet.h5
+        self.model = load_model('D:/ann/calcium-gui/U-Net/updated_unet.h5', compile=False, custom_objects={
                           'mean_iou': self.mean_iou, 'dice_coefficient': self.dice_coefficient, 'pixel_wise_accuracy': self.pixel_wise_accuracy})
 
 
@@ -100,7 +101,7 @@ class Unet:
         for i, organoid in enumerate(self.organoids):
             num_frames = self.fps * int(self.t_range[1]) - self.fps * int(self.t_range[0])
             time_intervals = np.linspace(int(self.t_range[0]), int(self.t_range[1]), num_frames)
-            colors = ['green', 'purple', 'orange', 'red']  # Define colors for each concentration
+            colors = ['blue', 'purple', 'orange', 'magenta']  # Define colors for each concentration
 
             mean_pixel_intensities, _ = zip(*self.process_organoids(*organoid))
 
@@ -108,7 +109,15 @@ class Unet:
             fig, axes = plt.subplots(2, 2, figsize=(10, 8))
 
             for j, intensity in enumerate(mean_pixel_intensities):
+                # Find local maxima and minima
+                intensity = np.array(intensity)
+                maxima_indices = argrelextrema(intensity, np.greater)
+                minima_indices = argrelextrema(intensity, np.less)
+
                 axes[j//2, j%2].plot(time_intervals, intensity, color=colors[j], markersize=1)
+
+                axes[j//2, j%2].scatter(time_intervals[maxima_indices], intensity[maxima_indices], color='red', label='Local Maxima')
+                axes[j//2, j%2].scatter(time_intervals[minima_indices], intensity[minima_indices], color='green', label='Local Minima')
                 axes[j//2, j%2].set_title(organoid[j].split('/')[-1])
                 axes[j//2, j%2].set_xlabel('Time (sec)')
                 axes[j//2, j%2].set_ylabel('Mean Intensities (pixels)')
@@ -153,7 +162,7 @@ class Unet:
 
         # plot of heart rate vs concentration
         for r, heart_rate in enumerate(heart_rates):
-            marker_size = 10+r*5
+            marker_size = 100+r*5
             plt.scatter(concentrations, heart_rate, marker='o', s=marker_size, label=f'Organoid {r+1}')
         plt.xlabel('Concentration (nM)')
         plt.ylabel('Heart Rate (Hz)')
