@@ -23,32 +23,32 @@ def index():
 def intensities():
     plot1, plot2 = None, None
 
-    if request.method == 'POST':
-        zip_files = request.files.getlist("zipfile")
-        print(request.files)
+    zip_files = request.files.getlist("zipfile")
+    print(request.files)
+    print(request.form)
 
-        # Store zip_files in session
-        for zip_file in zip_files:
-            names.append(secure_filename(zip_file.filename))
+    # Store zip_files in session
+    for zip_file in zip_files:
+        names.append(secure_filename(zip_file.filename))
 
-            file_path = os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(zip_file.filename))
-            zip_file.save(file_path)
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(zip_file.filename))
+        zip_file.save(file_path)
 
-            with open(file_path, "ab") as f:
-                f.seek(int(request.form["dzchunkbyteoffset"]))
-                f.write(zip_file.stream.read())
+        with open(file_path, "ab") as f:
+            f.seek(int(request.form["dzchunkbyteoffset"]))
+            f.write(zip_file.stream.read())
 
-            # Extract the contents of the zip file
-            with zipfile.ZipFile(file_path, 'r') as zip_ref:
-                zip_ref.extractall(os.path.join(app.config['UPLOAD_FOLDER'], zip_file.filename[:-4]))
-            extracted_folder_path = os.path.join(app.config['UPLOAD_FOLDER'], zip_file.filename[:-4])
+        # Extract the contents of the zip file
+        with zipfile.ZipFile(file_path, 'r') as zip_ref:
+            zip_ref.extractall(os.path.join(app.config['UPLOAD_FOLDER'], zip_file.filename[:-4]))
+        extracted_folder_path = os.path.join(app.config['UPLOAD_FOLDER'], zip_file.filename[:-4])
 
-            folders = []
-            for fold in os.listdir(extracted_folder_path):
-                folder = os.path.join(extracted_folder_path, fold)
-                folder = folder.replace('\\', '/')
-                folders.append(folder)
-            all_folders.append(folders)
+        folders = []
+        for fold in os.listdir(extracted_folder_path):
+            folder = os.path.join(extracted_folder_path, fold)
+            folder = folder.replace('\\', '/')
+            folders.append(folder)
+        all_folders.append(folders)
 
     # textbox to enter chemical
     chemical = request.form['chemical']
@@ -68,9 +68,7 @@ def intensities():
 
     # Creating an instance of class
     us1 = unetsegment.Unet(all_folders, chemical, fps, time, times)
-    print(con_vals)
     print(all_folders)
-    print(names)
 
     # Code to handle button click
     if request.form.get('action') == "Create mean intensity plot":
@@ -87,8 +85,7 @@ def intensities():
                            times=time2,
                            intensity_plots=plot1,
                            plot_heartrate=plot2,
-                           concentrations=con_vals,
-                           zipfile=zip_files)
+                           concentrations=con_vals)
 
 
 if __name__ == '__main__':

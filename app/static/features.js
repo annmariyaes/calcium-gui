@@ -29,16 +29,17 @@ document.addEventListener("DOMContentLoaded", function() {
 
 })
 
+
 function submitForm(action, tabName) {
     var form = document.getElementById(tabName);
     form.querySelector('input[name="action"]').value = action;
     form.submit();
 }
 
-var fileList = {};
 
-// Dropzone.js splits the file into chunks and uploads them one at a time.
-Dropzone.options.dropper = {
+
+Dropzone.autoDiscover = false;
+var myDropzone = new Dropzone("#dropper", {
     paramName: "zipfile",
     chunking: true,
     forceChunking: true,
@@ -47,25 +48,20 @@ Dropzone.options.dropper = {
     url: "/intensity",
     maxFilesize: '10GB',
     chunkSize: 9000000000000000000, // bytes
+});
 
-    init: function() {
+// Append additional form data
+myDropzone.on("sending", function(file, xhr, formData) {
+    formData.append('chemical', document.getElementById('chemical').value);
+    formData.append('fps', document.getElementById('fps').value);
+    formData.append('time1_textbox', document.getElementById('time1_textbox').value);
+    formData.append('time2_textbox', document.getElementById('time2_textbox').value);
+    formData.append('textbox', document.getElementById('textbox').value);
+});
 
-        // Append additional form data
-        this.on("sending", function(file, xhr, formData) {
-            formData.append('chemical', document.getElementById('chemical').value);
-            formData.append('fps', document.getElementById('fps').value);
-            formData.append('time1_textbox', document.getElementById('time1_textbox').value);
-            formData.append('time2_textbox', document.getElementById('time2_textbox').value);
-            formData.append('textbox', document.getElementById('textbox').value);
-            // formData.append('zipfile', file);
-        });
-
-        // Handle success, you can update UI or display a message
-        this.on("success", function (file, response) {
-            console.log(response);
-            file.previewElement.classList.add("dz-success");
-        });
-
-    }
-};
-
+// Handle success, you can update UI or display a message
+myDropzone.on("success", function (file, response) {
+    console.log(response);
+    console.log("File:", file);
+    file.previewElement.classList.add("dz-success");
+});
