@@ -40,14 +40,15 @@ function submitForm(action, tabName) {
 
 Dropzone.autoDiscover = false;
 var myDropzone = new Dropzone("#dropper", {
-    paramName: "zipfile",
+    paramName: "zipfiles",
+    addRemoveLinks: true,
     chunking: true,
     forceChunking: true,
-    addRemoveLinks: true,
     acceptedFiles: ".zip",
     url: "/intensity",
     maxFilesize: '10GB',
-    chunkSize: 9000000000000000000, // bytes
+    chunkSize: 9000000000000000000,
+
 });
 
 // Append additional form data
@@ -65,3 +66,6 @@ myDropzone.on("success", function (file, response) {
     console.log("File:", file);
     file.previewElement.classList.add("dz-success");
 });
+
+
+

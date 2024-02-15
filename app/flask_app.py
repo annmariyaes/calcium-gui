@@ -23,12 +23,12 @@ def index():
 def intensities():
     plot1, plot2 = None, None
 
-    zip_files = request.files.getlist("zipfile")
+    zip_files = request.files.getlist("zipfiles")
     print(request.files)
     print(request.form)
 
     # Store zip_files in session
-    for zip_file in zip_files:
+    for index, zip_file in enumerate(zip_files):
         names.append(secure_filename(zip_file.filename))
 
         file_path = os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(zip_file.filename))
