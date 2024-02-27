@@ -1,6 +1,6 @@
 import os
 import zipfile
-from flask import Flask, render_template, request, session
+from flask import Flask, render_template, request, redirect, url_for, session
 from werkzeug.utils import secure_filename
 import matplotlib
 matplotlib.use('Agg')
@@ -89,6 +89,6 @@ def intensities():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()
 
 

@@ -106,27 +106,37 @@ class Unet:
 
             mean_pixel_intensities, _ = zip(*self.process_organoids(*organoid))
 
-
             for j, intensity in enumerate(mean_pixel_intensities):
                 # Find local maxima and minima
+
                 intensity = np.array(intensity)
-                maxima_indices = argrelextrema(intensity, np.greater)
-                minima_indices = argrelextrema(intensity, np.less)
+                th = 0.9
+                maxima_indices = argrelextrema(intensity, np.greater, order=1)
+                filtered_maxima_indices = maxima_indices[0][intensity[maxima_indices] > th]
+                minima_indices = argrelextrema(intensity, np.less, order=1)
+                filtered_minima_indices = minima_indices[0][intensity[minima_indices] < th]
+                ver_signal = np.mean(intensity, axis=0)
 
                 plt.plot(time_intervals, intensity, color=colors[j], markersize=1)
 
-                mins = min(len(maxima_indices[0]), len(minima_indices[0]))
+                # mean of signal point to point
+                plt.axhline(ver_signal, color='green', linestyle='--')
+                print(ver_signal)
 
-                for min_i, max_i in zip(minima_indices[0][:mins], maxima_indices[0][:mins]):
+                '''
+                mins = min(len(filtered_maxima_indices[0]), len(filtered_maxima_indices[0]))
+                
+                for min_i, max_i in zip(filtered_maxima_indices[0][:mins], filtered_maxima_indices[0][:mins]):
                     (x1,y1) = (time_intervals[max_i], intensity[max_i])
                     (x2, y2) = (time_intervals[min_i], intensity[min_i])
                     # print(x1, y1, x2, y2)
 
                     plt.fill_between([x1, x2], y1, y2, color='mistyrose', label='Irregular phase')
+                '''
                 # axes[j//2, j%2]
-                print(time_intervals[maxima_indices], intensity[maxima_indices], time_intervals[minima_indices], intensity[minima_indices])
-                plt.scatter(time_intervals[maxima_indices], intensity[maxima_indices], color='red', label='Local Maxima')
-                plt.scatter(time_intervals[minima_indices], intensity[minima_indices], color='green', label='Local Minima')
+
+                plt.plot(time_intervals[filtered_maxima_indices], intensity[filtered_maxima_indices], color='red', label='Local Maxima')
+                plt.plot(time_intervals[filtered_minima_indices], intensity[filtered_minima_indices], color='green', label='Local Minima')
                 plt.title(organoid[j].split('/')[-1])
                 plt.xlabel('Time (sec)')
                 plt.ylabel('Mean Intensities (pixels)')
@@ -134,11 +144,11 @@ class Unet:
                 # Adjust layout to prevent overlap
                 plt.tight_layout()
                 t = self.t_range[0] + '-' + self.t_range[1]
-                plot_filename = 'static/uploads/' + self.chemical + ' intensity t' + organoid[j].split('/')[-1] + t + ' ' + str(i+1) + '.png'
+                plot_filename = 'static/uploads/' + self.chemical + ' intensity t ' + t + organoid[j].split('/')[-1] + ' ' + str(i+1) + '.png'
                 plt.savefig(plot_filename)
                 plt.close()
                 intensity_plot_paths.append(plot_filename)
-            return intensity_plot_paths
+        return intensity_plot_paths
 
 
     def calculate_heart_rate(self, intensity):

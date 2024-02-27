@@ -48,7 +48,17 @@ var myDropzone = new Dropzone("#dropper", {
     url: "/intensity",
     maxFilesize: '10GB',
     chunkSize: 9000000000000000000,
-
+    removedfile: function(file) {
+        var name = file.name;
+        $.ajax({
+            type: 'POST',
+            url: host + 'upload/unfile',
+            data: "id=" + name,
+            dataType: 'html'
+        });
+        var _ref;
+        return (_ref = file.previewElement) != null ? _ref.parentNode.removeChild(file.previewElement) : void 0;
+    },
 });
 
 // Append additional form data
@@ -66,6 +76,4 @@ myDropzone.on("success", function (file, response) {
     console.log("File:", file);
     file.previewElement.classList.add("dz-success");
 });
-
-
 
