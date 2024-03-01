@@ -53,20 +53,26 @@
                 </div>
 
                 <div class="col">
-                    {% if intensity_plots %}
-                        <div style="display: flex;  flex-direction: column;">
-                            {% for intensity_plot in intensity_plots %}
-                                  <div style="margin-left: 10px;">
-                                      <img src="{{ intensity_plot }}" alt="Intensity Plot">
-                                  </div> <br><br>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
+                    {% if plots %}
+                        {% if plots['intensity'] %}
+                            <div style="display: flex; flex-direction: column;">
+                                {% for intensity_plot in plots['intensity'] %}
+                                    <div style="margin-left: 10px;">
+                                        <img src="{{ intensity_plot }}" alt="Intensity Plot">
+                                    </div>
+                                    <br><br>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
 
-                    {% if plot_heartrate %}
-                        <img src="{{ plot_heartrate }}" alt="Plot">
+                        {% if plots['heartrate'] %}
+                            <div style="margin-left: 10px;">
+                                <img src="{{ plots['heartrate'] }}" alt="Heart Rate vs Concentration Plot">
+                            </div>
+                        {% endif %}
                     {% endif %}
                 </div>
+
 
             </div>
         </form>

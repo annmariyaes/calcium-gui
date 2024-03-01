@@ -102,7 +102,7 @@ class Unet:
         for i, organoid in enumerate(self.organoids):
             num_frames = self.fps * int(self.t_range[1]) - self.fps * int(self.t_range[0])
             time_intervals = np.linspace(int(self.t_range[0]), int(self.t_range[1]), num_frames)
-            colors = ['blue', 'purple', 'orange', 'magenta']  # Define colors for each concentration
+            colors = ['blue', 'purple', 'magenta', 'green']  # Define colors for each concentration
 
             mean_pixel_intensities, _ = zip(*self.process_organoids(*organoid))
 
@@ -115,12 +115,12 @@ class Unet:
                 filtered_maxima_indices = maxima_indices[0][intensity[maxima_indices] > th]
                 minima_indices = argrelextrema(intensity, np.less, order=1)
                 filtered_minima_indices = minima_indices[0][intensity[minima_indices] < th]
-                ver_signal = np.mean(intensity, axis=0)
+                ver_signal = np.mean(intensity)
 
                 plt.plot(time_intervals, intensity, color=colors[j], markersize=1)
 
                 # mean of signal point to point
-                plt.axhline(ver_signal, color='green', linestyle='--')
+                plt.axhline(ver_signal, color='orange', linestyle='--')
                 print(ver_signal)
 
                 '''
@@ -135,8 +135,8 @@ class Unet:
                 '''
                 # axes[j//2, j%2]
 
-                plt.plot(time_intervals[filtered_maxima_indices], intensity[filtered_maxima_indices], color='red', label='Local Maxima')
-                plt.plot(time_intervals[filtered_minima_indices], intensity[filtered_minima_indices], color='green', label='Local Minima')
+                plt.scatter(time_intervals[filtered_maxima_indices], intensity[filtered_maxima_indices], color='orange')
+                plt.scatter(time_intervals[filtered_minima_indices], intensity[filtered_minima_indices], color='orange')
                 plt.title(organoid[j].split('/')[-1])
                 plt.xlabel('Time (sec)')
                 plt.ylabel('Mean Intensities (pixels)')

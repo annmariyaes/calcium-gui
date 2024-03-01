@@ -21,7 +21,8 @@ def index():
 
 @app.route('/intensity', methods=['GET', 'POST'])
 def intensities():
-    plot1, plot2 = None, None
+    plots = dict()
+    names = []
 
     zip_files = request.files.getlist("zipfiles")
     print(request.files)
@@ -32,6 +33,7 @@ def intensities():
         names.append(secure_filename(zip_file.filename))
 
         file_path = os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(zip_file.filename))
+        names.append(secure_filename(zip_file.filename))
         zip_file.save(file_path)
 
         with open(file_path, "ab") as f:
@@ -72,20 +74,21 @@ def intensities():
 
     # Code to handle button click
     if request.form.get('action') == "Create mean intensity plot":
-        plot1 = us1.display_intensity_plot()
+        plots['intensity'] = us1.display_intensity_plot()
 
     # Code to handle button click
-    elif request.form.get('action') == "Create heart rate vs concentration plot":
-        plot2 = us1.display_heartrate_plot(concentrations)
+    if request.form.get('action') == "Create heart rate vs concentration plot":
+        plots['heartrate'] = us1.display_heartrate_plot(concentrations)
+
 
     return render_template('index.html',
                            chemical=chemical,
                            fps=fps,
                            time=time,
                            times=time2,
-                           intensity_plots=plot1,
-                           plot_heartrate=plot2,
-                           concentrations=con_vals)
+                           plots=plots,
+                           concentrations=con_vals,
+                           names=names)
 
 
 if __name__ == '__main__':
